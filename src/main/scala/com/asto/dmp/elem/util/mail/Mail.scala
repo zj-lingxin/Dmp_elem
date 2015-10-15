@@ -2,7 +2,6 @@ package com.asto.dmp.elem.util.mail
 
 import java.io.FileInputStream
 import java.util.Properties
-
 import com.asto.dmp.elem.base.Constants
 
 object Mail {

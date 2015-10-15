@@ -3,11 +3,10 @@ package com.asto.dmp.elem.service
 import com.asto.dmp.elem.base._
 import com.asto.dmp.elem.dao.CreditDao
 import com.asto.dmp.elem.temptable.CreditTable
-import com.asto.dmp.elem.util.logging.Logging
 import com.asto.dmp.elem.util.mail.{MailAgent, Mail}
 import com.asto.dmp.elem.util.FileUtils
 
-class CreditService extends DataSource with scala.Serializable with Logging {
+class CreditService extends DataSource with scala.Serializable  {
 
   import sqlContext.implicits._
 

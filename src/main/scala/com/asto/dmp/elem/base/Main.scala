@@ -1,7 +1,8 @@
 package com.asto.dmp.elem.base
 
 import com.asto.dmp.elem.service._
-import com.asto.dmp.elem.util.logging.Logging
+import org.apache.spark.Logging
+
 
 object Main extends Logging {
   def main(args: Array[String]) {

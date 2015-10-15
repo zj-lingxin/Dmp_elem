@@ -1,9 +1,8 @@
 package com.asto.dmp.elem.base
 
-import com.asto.dmp.elem.util.logging.Logging
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{Logging, SparkConf, SparkContext}
 
 object BaseContext extends Logging with scala.Serializable {
   private var _sc: SparkContext = _
@@ -40,7 +39,7 @@ object BaseContext extends Logging with scala.Serializable {
     val masterInSparkConf = conf.getOption("spark.master")
     (masterInCodes, masterInSparkConf) match {
       case (None, None) =>
-        logWarn(s"集群和程序代码中都没有设置Master参数,在${getClass.getName}的initSparkContext中对它设置成local")
+        logWarning(s"集群和程序代码中都没有设置Master参数,在${getClass.getName}的initSparkContext中对它设置成local")
         conf.setMaster("local")
       case (None, Some(_)) =>
         logInfo(s"程序代码中都没有设置Master参数,但是集群中设置了Master参数，使用集群设置的Master参数")

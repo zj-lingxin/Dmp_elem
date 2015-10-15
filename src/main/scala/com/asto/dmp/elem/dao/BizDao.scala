@@ -2,9 +2,6 @@ package com.asto.dmp.elem.dao
 
 import com.asto.dmp.elem.base.DataSource
 
-/**
- * Created by lingx on 2015/10/14.
- */
 class BizDao extends DataSource {
   val queryString = "id,user_id"
   //  def orderProperty(query: String) = {

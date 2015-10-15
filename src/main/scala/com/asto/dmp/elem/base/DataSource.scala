@@ -1,6 +1,7 @@
 package com.asto.dmp.elem.base
 
-import com.asto.dmp.elem.util.logging.Logging
+
+import org.apache.spark.Logging
 import org.apache.spark.sql.types._
 
 trait DataSource extends Logging with scala.Serializable {
