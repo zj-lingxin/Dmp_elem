@@ -16,6 +16,7 @@ object Constants {
     val DEFAULT_LOG_PROPS  = "com/asto/dmp/elem/log4j.properties"
     //hdfs中表的字段的分隔符
     val SEPARATOR = "@#@"
+    val LOG_WRAPPER = "######################"
   }
 
   /** 输入文件路径 **/
@@ -46,10 +47,10 @@ object Constants {
 
   /** 表的模式 **/
   object Schema {
-    //订单ID, 餐厅ID, 餐厅名称, 订单详情json, 下单客户ID, 客户名称, 城市ID, 订单额, 退款状态, 下单时间, 手机号, 下单配送地址, 下单经纬度d
-    val ORDER = "order_date:String,order_id:String,shop_name:String,order_details:String,custom_id:Double," +
-      "custom_name:String,city_id:String,order_money:String,refund_status:String,place_order_time:String," +
-      "custom_mobile:String,delivery_address:String,lng_lat:String"
+    //订单ID, 餐厅ID, 餐厅Id, 餐厅名称, 订单详情json, 下单客户ID, 客户名称, 城市ID, 订单额, 退款状态, 下单时间, 手机号, 下单配送地址, 下单经纬度d
+    val ORDER = "order_date:String, order_id:String, shop_id:String, shop_name:String, order_details:String, " +
+      "custom_id:String, custom_name:String, city_id:String, order_money:String, refund_status:String, " +
+      "place_order_time:String, custom_mobile:String, delivery_address:String, lng_lat:String"
   }
 
   /** 邮件发送功能相关常量 **/
