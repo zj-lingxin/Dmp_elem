@@ -60,6 +60,8 @@ class CreditService extends DataSource with scala.Serializable {
         ("	2015/8/13	","	12674266136499453	","	23112	","	吉祥馄饨	","	16.5 	","	1	"),
         ("	2015/8/13	","	12974664290772253	","	23112	","	吉祥馄饨	","	15.0 	","	0	")
       )).map(t => Utils.trimTuple(t)).map(t=>(t.productElement(1),t.productElement(3))).foreach(println)
+      import com.asto.dmp.elem.util.Utils._
+      println(Array(1,2,3,4,5).toTuple4)
       
       /*
             val sql = SQL("order_id, shop_id, shop_name, custom_id, custom_name", "order_id = 12254695004719553 ")
