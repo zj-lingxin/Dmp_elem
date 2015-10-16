@@ -21,7 +21,7 @@ class CreditDao extends scala.Serializable  {
   def refundRate =
     sqlContext.sql("select shop_id,avg(refund_rate) from refund_info group by shop_id ").map(t => (t(0).toString, t(1)))
 
-  /** 获取店铺的行业类型 类型：(property_uuid, 行业类型) **/
+  /*** 获取店铺的行业类型 类型：(property_uuid, 行业类型) **/
   def shopInfo =
     sqlContext.sql("select property_uuid, industry_type from property_shop ").map(a => (a(0).toString, a(1).toString))
 
