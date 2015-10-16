@@ -6,7 +6,6 @@ import com.asto.dmp.elem.util.FileUtils
 
 class CreditService extends DataSource with scala.Serializable  {
 
-  import sqlContext.implicits._
 
   def run(): Unit = {
     try {
@@ -15,19 +14,18 @@ class CreditService extends DataSource with scala.Serializable  {
       FileUtils.deleteHdfsFile(Constants.OutputPath.CREDIT_PARQUET)
 
 
-      //查出所有数据
-     /* BizDao.getOrderProps().take(10).foreach(println)*/
-
-      //查出order_id = 12254695004719553 的数据
-      //BizDao.getOrderProps(new SQL().setWhere("order_id = 12254695004719553 ")).take(10).foreach(println)
-
-      //查出order_id = 12254695004719553 的数据，并且只需要order_id, shop_id, shop_name, custom_id, custom_name
-      val sql = new SQL()
-      sql.setSelect("order_id, shop_id, shop_name, custom_id, custom_name")
-      sql.setWhere("order_id = 12254695004719553 ")
+      val sql = SQL("order_id, shop_id, shop_name, custom_id, custom_name", "order_id = 12254695004719553 ")
       BizDao.getOrderProps(sql).take(10).foreach(println)
+
+      val sql2 = SQL("order_id, shop_id, shop_name, custom_id, custom_name")
+      BizDao.getOrderProps(sql2).take(10).foreach(println)
+
+      val sql3 = SQL()
+      BizDao.getOrderProps(sql3).take(10).foreach(println)
+
+      BizDao.getOrderProps().take(10).foreach(println)
+
 /*
-      BizDao.getOrderProps(new SQL().setOrderBy("custom_id asc").setWhere("order_date = '2014/9/17'")).take(10).foreach(println)*/
 
       /**
       CreditTable.registerTradeView()

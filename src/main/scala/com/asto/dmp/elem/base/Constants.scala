@@ -12,8 +12,6 @@ object Constants {
     val CHINESE_NAME       = "饿了么"
     //项目数据存放的Hadoop的目录
     val HADOOP_DIR         = "hdfs://appcluster/elem/"
-    //默认日志文件的路径
-    val DEFAULT_LOG_PROPS  = "com/asto/dmp/elem/log4j.properties"
     //hdfs中表的字段的分隔符
     val SEPARATOR = "@#@"
     val LOG_WRAPPER = "######################"

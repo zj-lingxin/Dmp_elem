@@ -9,7 +9,7 @@ import com.asto.dmp.elem.base.Constants
 object Utils {
 
   /**
-   * convert Seq to Tuple
+   * Convert Seq to Tuple
    * you can use this method to convert List to Tuple,or Array to Tuple, etc.
    * It's worth noting that: toTuple(List(111, 222)) is Error, because Int is not the subclass of Object.
    * but toTuple(List[Integer](111, 222)) is ok
@@ -22,10 +22,21 @@ object Utils {
     tupleClass.getConstructors.apply(0).newInstance(seq: _*).asInstanceOf[Product]
   }
 
+  /**
+   * Use trim() method for every element of Iterable,and return the result
+   * @param iterable
+   * @tparam A
+   * @return
+   */
   def trimIterable[A <: Iterable[String]](iterable: A): A= {
     iterable.map(_.trim).asInstanceOf[A]
   }
 
+  /**
+   * Add a ${Constants.App.LOG_WRAPPER} in the log header and tail
+   * @param log log Information
+   * @return
+   */
   def wrapLog(log: String) = {
     s"${Constants.App.LOG_WRAPPER} $log ${Constants.App.LOG_WRAPPER}"
   }
