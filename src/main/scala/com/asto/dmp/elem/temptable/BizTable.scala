@@ -7,7 +7,7 @@ import org.apache.spark.sql.Row
 object BizTable {
   def registerOrder() = {
     val orderRowRDD = BaseContext.getSparkContext.textFile(Constants.InputPath.ORDER).
-      map(_.split(Constants.App.SEPARATOR)).filter(x => x.length == 14).map(a => Row(a))
+      map(_.split(Constants.InputPath.SEPARATOR)).filter(x => x.length == 14).map(a => Row(a))
     BaseContext.getSqlContext.createDataFrame(orderRowRDD, getSchema(Constants.Schema.ORDER)).registerTempTable("order")
   }
 }

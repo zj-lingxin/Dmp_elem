@@ -2,9 +2,9 @@ package com.asto.dmp.elem.service
 
 import com.asto.dmp.elem.base._
 import com.asto.dmp.elem.dao.{BizDao}
-import com.asto.dmp.elem.util.FileUtils
+import com.asto.dmp.elem.util.{Utils, DateUtils, FileUtils}
 
-class CreditService extends DataSource with scala.Serializable  {
+class CreditService extends DataSource with scala.Serializable {
 
 
   def run(): Unit = {
@@ -13,18 +13,67 @@ class CreditService extends DataSource with scala.Serializable  {
       FileUtils.deleteHdfsFile(Constants.OutputPath.CREDIT_TEXT)
       FileUtils.deleteHdfsFile(Constants.OutputPath.CREDIT_PARQUET)
 
+      //刷单
+      val cilckFramInfo =  sc.parallelize(Seq(
+        ("	2015/6/13	","	12574664669042353	","	15453	","	风云便当	","	15.0 	","	0	"),
+        ("	2015/6/13	","	12574865121584353	","	15453	","	风云便当	","	24.0 	","	1	"),
+        ("	2015/6/13	","	12474664389438153	","	15453	","	风云便当	","	16.0 	","	1	"),
+        ("	2015/6/13	","	12574564579168353	","	15453	","	风云便当	","	15.0 	","	0	"),
+        ("	2015/6/13	","	12174964992731653	","	15453	","	风云便当	","	16.0 	","	1	"),
+        ("	2015/6/13	","	12174266241880553	","	15453	","	风云便当	","	15.0 	","	1	"),
+        ("	2015/6/13	","	12474064477526253	","	15453	","	风云便当	","	16.0 	","	0	"),
+        ("	2015/7/13	","	12674266136499453	","	15453	","	风云便当	","	16.5 	","	1	"),
+        ("	2015/7/13	","	12474664389438153	","	15453	","	风云便当	","	16.0 	","	1	"),
+        ("	2015/7/13	","	12574564579168353	","	15453	","	风云便当	","	15.0 	","	0	"),
+        ("	2015/7/13	","	12174964992731653	","	15453	","	风云便当	","	16.0 	","	1	"),
+        ("	2015/7/13	","	12174266241880553	","	15453	","	风云便当	","	15.0 	","	1	"),
+        ("	2015/7/13	","	12474064477526253	","	15453	","	风云便当	","	16.0 	","	0	"),
+        ("	2015/7/13	","	12674266136499453	","	15453	","	风云便当	","	16.5 	","	1	"),
+        ("	2015/8/13	","	12174866611231153	","	15453	","	风云便当	","	16.0 	","	1	"),
+        ("	2015/8/13	","	12274666824734653	","	15453	","	风云便当	","	15.0 	","	0	"),
+        ("	2015/8/13	","	12474464682199253	","	15453	","	风云便当	","	15.0 	","	1	"),
+        ("	2015/8/13	","	12174164356238453	","	15453	","	风云便当	","	15.0 	","	0	"),
+        ("	2015/8/13	","	12774265785901053	","	15453	","	风云便当	","	20.0 	","	1	"),
+        ("	2015/8/13	","	12574664669042353	","	15453	","	风云便当	","	15.0 	","	0	"),
+        ("	2015/8/13	","	12574865121584353	","	15453	","	风云便当	","	24.0 	","	1	"),
+        ("	2015/8/13	","	12474664389438153	","	15453	","	风云便当	","	16.0 	","	1	"),
+        ("	2015/8/13	","	12574564579168353	","	15453	","	风云便当	","	15.0 	","	0	"),
+        ("	2015/8/13	","	12174964992731653	","	15453	","	风云便当	","	16.0 	","	1	"),
+        ("	2015/8/13	","	12174266241880553	","	15453	","	风云便当	","	15.0 	","	1	"),
+        ("	2015/8/13	","	12474064477526253	","	15453	","	风云便当	","	16.0 	","	0	"),
+        ("	2015/8/13	","	12674266136499453	","	15453	","	风云便当	","	16.5 	","	1	"),
+        ("	2015/8/13	","	12974664290772253	","	15453	","	风云便当	","	15.0 	","	0	"),
+        ("	2015/7/13	","	12474064477526253	","	23112	","	吉祥馄饨	","	16.0 	","	0	"),
+        ("	2015/7/13	","	12674266136499453	","	23112	","	吉祥馄饨	","	16.5 	","	1	"),
+        ("	2015/8/13	","	12174866611231153	","	23112	","	吉祥馄饨	","	16.0 	","	1	"),
+        ("	2015/8/13	","	12274666824734653	","	23112	","	吉祥馄饨	","	15.0 	","	0	"),
+        ("	2015/8/13	","	12474464682199253	","	23112	","	吉祥馄饨	","	15.0 	","	1	"),
+        ("	2015/8/13	","	12174164356238453	","	23112	","	吉祥馄饨	","	15.0 	","	0	"),
+        ("	2015/8/13	","	12774265785901053	","	23112	","	吉祥馄饨	","	20.0 	","	1	"),
+        ("	2015/8/13	","	12574664669042353	","	23112	","	吉祥馄饨	","	15.0 	","	0	"),
+        ("	2015/8/13	","	12574865121584353	","	23112	","	吉祥馄饨	","	24.0 	","	1	"),
+        ("	2015/8/13	","	12474664389438153	","	23112	","	吉祥馄饨	","	16.0 	","	1	"),
+        ("	2015/8/13	","	12574564579168353	","	23112	","	吉祥馄饨	","	15.0 	","	0	"),
+        ("	2015/8/13	","	12174964992731653	","	23112	","	吉祥馄饨	","	16.0 	","	1	"),
+        ("	2015/8/13	","	12174266241880553	","	23112	","	吉祥馄饨	","	15.0 	","	1	"),
+        ("	2015/8/13	","	12474064477526253	","	23112	","	吉祥馄饨	","	16.0 	","	0	"),
+        ("	2015/8/13	","	12674266136499453	","	23112	","	吉祥馄饨	","	16.5 	","	1	"),
+        ("	2015/8/13	","	12974664290772253	","	23112	","	吉祥馄饨	","	15.0 	","	0	")
+      )).map(t => Utils.trimTuple(t)).map(t=>(t.productElement(1),t.productElement(3))).foreach(println)
+      
+      /*
+            val sql = SQL("order_id, shop_id, shop_name, custom_id, custom_name", "order_id = 12254695004719553 ")
+            BizDao.getOrderProps(sql).map(t=>(t(0),t(1))).take(10).foreach(println)*/
 
-      val sql = SQL("order_id, shop_id, shop_name, custom_id, custom_name", "order_id = 12254695004719553 ")
-      BizDao.getOrderProps(sql).take(10).foreach(println)
+          /*  val sql2 = SQL("order_id, shop_id, shop_name, custom_id, custom_name")
+            BizDao.getOrderProps(sql2).take(10).foreach(println)
 
-      val sql2 = SQL("order_id, shop_id, shop_name, custom_id, custom_name")
-      BizDao.getOrderProps(sql2).take(10).foreach(println)
+            val sql3 = SQL()
+            BizDao.getOrderProps(sql3).take(10).foreach(println)
 
-      val sql3 = SQL()
-      BizDao.getOrderProps(sql3).take(10).foreach(println)
-
-      BizDao.getOrderProps().take(10).foreach(println)
-
+            BizDao.getOrderProps().take(10).foreach(println)
+*/
+      //val sc.parallelize()
 
       /**
       CreditTable.registerTradeView()
@@ -131,45 +180,53 @@ class CreditService extends DataSource with scala.Serializable  {
       // 最后输出的字段分别是：
       // #1# shop_id, #2# 前12个月销售总额，#3# [(前12个月销售总额-大型活动产生的交易额)*(1-刷单比率)*（1-退款率）]，#4# β，
       // #5# 行业类型，#6# 得分，#7# [(前12个月销售总额-大型活动产生的交易额)*(1-刷单比率)*（1-退款率）]*β/12*授信月份数，#8# 前12个月销售总额/12*1.5，
-      // #9# 行业风险限额, #10# 产品限额, #11# 大型活动销售额,( /*t._2._2.get._9,*/ 去掉！) #12# 刷单比率,
+      // #9# 行业风险限额, #10# 产品限额, #11# 大型活动销售额,( /*t._2._2.get._9, */ 去掉！) #12# 刷单比率,
       // #13# 退款率, #14# MIN{[(前12个月销售总额-大型活动产生的交易额)*(1-刷单比率)*（1-退款率）]*β/12*授信月份数,totalSales/12*1.5,行业风险限额,产品限额}
       val result = totalSales.map(t => (t._1, (t._2, t._2 / 12 * 1.5))).leftOuterJoin(tmpResult).map( t => (t._1, t._2._1._1, t._2._2.get._1, t._2._2.get._2, t._2._2.get._3, t._2._2.get._4,
         t._2._2.get._5, t._2._1._2, t._2._2.get._6, t._2._2.get._7, t._2._2.get._10, t._2._2.get._11, Array(t._2._1._2, t._2._2.get._8).min))
       result.toDF("shop_id", "前12个月销售总额", "resultSales", "β", "行业类型", "得分", "resultSales*β/12*授信月份数",
         "前12个月销售总额/12*1.5", "行业风险限额", "产品限额", "刷单比率", "退款率", "授信额度").write.parquet(Constants.OutputPath.CREDIT_PARQUET)
       result.map(_.productIterator.mkString(",")).coalesce(1).saveAsTextFile(Constants.OutputPath.CREDIT_TEXT)
-**/
+        * */
     } catch {
       case t: Throwable =>
-       // MailAgent(t, Constants.Mail.CREDIT_SUBJECT, Mail.getPropByKey("mail_to_credit")).sendMessage()
+        // MailAgent(t, Constants.Mail.CREDIT_SUBJECT, Mail.getPropByKey("mail_to_credit")).sendMessage()
         logError(Constants.Mail.CREDIT_SUBJECT, t)
     }
   }
 }
 
 object CreditService {
-  //行业风险限额的确定。修改之后：行业风险限额=行业风险限额（原）*2
-  def getRiskLimits(industry_type: String, sales: Double) = {
-    val s = sales / 10000 //转化为以万为单位
-    if ("3C".equals(industry_type)) {
-      if (s >= 15000) 2000000
-      else if (s >= 8000) 1000000
-      else if (s >= 3000) 800000
-      else if (s >= 1000) 600000
-      else if (s >= 500) 400000
-      else 200000
-    } else {
-      if (s >= 10000) 2000000
-      else if (s >= 5000) 1000000
-      else if (s >= 2000) 700000
-      else if (s >= 800) 500000
-      else if (s >= 300) 400000
-      else 300000
-    }
+  //授信额度上限(单位：元)
+  val loanCeiling = 500000
+  def getBeta(salesRateWeighting: Double, dayAverageSales: Double): Double = {
+    if (salesRateWeighting > 2)
+      getBetaByAvgSalAndRow(dayAverageSales, Array(1.50, 1.30, 1.20, 1.00, 0.90))
+    else if (salesRateWeighting > 1.5 && salesRateWeighting <= 2)
+      getBetaByAvgSalAndRow(dayAverageSales, Array(1.30, 1.10, 1.00, 0.80, 0.70))
+    else if (salesRateWeighting > 1.2 && salesRateWeighting <= 1.5)
+      getBetaByAvgSalAndRow(dayAverageSales, Array(1.20, 1.00, 0.90, 0.70, 0.60))
+    else if (salesRateWeighting > 1 && salesRateWeighting <= 1.2)
+      getBetaByAvgSalAndRow(dayAverageSales, Array(1.00, 0.90, 0.80, 0.60, 0.50))
+    else if (salesRateWeighting > 0.8 && salesRateWeighting <= 1)
+      getBetaByAvgSalAndRow(dayAverageSales, Array(0.90, 0.70, 0.60, 0.40, 0.20))
+    else
+      0D
   }
 
-  //定义 shouXinMonths = 授信月份数
-  val shouXinMonths = 6
-  //定义 productLimits = 产品限额 ，定为50w
-  val productLimits = 500000
+  private def getBetaByAvgSalAndRow(dayAverageSales: Double, betaRow: Array[Double]): Double = {
+    if (dayAverageSales > 5000)
+      betaRow(0)
+    else if (dayAverageSales > 4000 && dayAverageSales <= 5000)
+      betaRow(1)
+    else if (dayAverageSales > 3000 && dayAverageSales <= 4000)
+      betaRow(2)
+    else if (dayAverageSales > 2000 && dayAverageSales <= 3000)
+      betaRow(3)
+    else if (dayAverageSales > 1000 && dayAverageSales <= 2000)
+      betaRow(4)
+    else
+      0D
+  }
+
 }

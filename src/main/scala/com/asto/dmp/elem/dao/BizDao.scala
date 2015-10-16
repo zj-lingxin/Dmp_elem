@@ -6,10 +6,10 @@ import org.apache.spark.sql.Row
 
 object BizDao extends DataSource {
 
-  private def getProps(inputFilePath: String, schema: String, tempTableName: String, sqlObj: SQL) = {
+  private def getProps(inputFilePath: String, schema: String, tempTableName: String, sqlObj: SQL, separator: String = Constants.InputPath.SEPARATOR) = {
     val fields = schema.split(",")
     val rowRDD = BaseContext.getSparkContext.textFile(inputFilePath).
-      map(_.split(Constants.App.SEPARATOR)).filter(x => x.length == fields.length).
+      map(_.split(separator)).filter(x => x.length == fields.length).
       map(fields => for (field <- fields) yield field.trim).map(fields => Row(fields: _*))
     sqlContext.createDataFrame(rowRDD, getSchema(schema)).registerTempTable(tempTableName)
 
@@ -31,7 +31,7 @@ object BizDao extends DataSource {
       _sql += s" LIMIT ${sqlObj.getLimit}"
 
     logInfo(Utils.wrapLog(s"执行Sql:${_sql} ####################"))
-    val rdd = sqlContext.sql(_sql).map(a => Utils.toTuple(a.toSeq.asInstanceOf[Seq[String]]))
+    val rdd = sqlContext.sql(_sql).map(a => a.toSeq.toArray)
 
     if (Option(sqlObj.getOrderBy).isDefined) {
       //order by操作完成后设回默认值200

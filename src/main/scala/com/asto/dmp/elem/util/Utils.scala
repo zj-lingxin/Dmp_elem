@@ -17,7 +17,7 @@ object Utils {
    * @tparam A
    * @return
    */
-  def toTuple[A <: Object](seq: Seq[A]): Product = {
+  def toProduct[A <: Object](seq: Seq[A]):Product = {
     val tupleClass = Class.forName("scala.Tuple" + seq.size)
     tupleClass.getConstructors.apply(0).newInstance(seq: _*).asInstanceOf[Product]
   }
@@ -28,9 +28,13 @@ object Utils {
    * @tparam A
    * @return
    */
-  def trimIterable[A <: Iterable[String]](iterable: A): A= {
+  def trimIterable[A <: Iterable[String]](iterable: A): A = {
     iterable.map(_.trim).asInstanceOf[A]
   }
+
+  def trimTuple(x: Product) = toProduct((for (e <- x.productIterator) yield {
+    e.toString.trim
+  }).toList)
 
   /**
    * Add a ${Constants.App.LOG_WRAPPER} in the log header and tail

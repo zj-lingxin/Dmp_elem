@@ -12,19 +12,21 @@ object Constants {
     val CHINESE_NAME       = "饿了么"
     //项目数据存放的Hadoop的目录
     val HADOOP_DIR         = "hdfs://appcluster/elem/"
-    //hdfs中表的字段的分隔符
-    val SEPARATOR = "@#@"
+
     val LOG_WRAPPER = "######################"
   }
 
   /** 输入文件路径 **/
   object InputPath {
+    //hdfs中表的字段的分隔符
+    val SEPARATOR = "@#@"
     private val DIR        = s"${App.HADOOP_DIR}/input"
     val ORDER              = s"$DIR/order/*"
   }
 
   /** 中间文件路径 **/
   object MiddlePath {
+    val SEPARATOR = ","
     private val DIR        = s"${App.HADOOP_DIR}/middle"
     val BETA               = s"$DIR/beta/*"
     val INDUSTRY_RELATION  = s"$DIR/industry_relation" //这里不需要“/*”
@@ -32,6 +34,7 @@ object Constants {
 
   /** 输出文件路径 **/
   object OutputPath {
+    val SEPARATOR = ","
     private val TODAY    = DateUtils.getStrDate("yyyyMM/dd")
     private val DIR      = s"${App.HADOOP_DIR}/output"
     //刷单结果路径
