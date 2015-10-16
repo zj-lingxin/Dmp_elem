@@ -1,7 +1,6 @@
 package com.asto.dmp.elem.base
 
 class SQL(private var _select: String, private var _where: String) {
-  //暂时不支持 _groupBy
   private var _orderBy: String = _
   private var _limit: Integer = _
 
