@@ -25,7 +25,6 @@ class CreditService extends DataSource with scala.Serializable  {
 
       BizDao.getOrderProps().take(10).foreach(println)
 
-/*
 
       /**
       CreditTable.registerTradeView()
