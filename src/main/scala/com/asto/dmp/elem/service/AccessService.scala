@@ -44,7 +44,7 @@ object AccessService {
       } else if (dateInRecords < yearAndValue) {
         end = true
       }
-      //如果dateInRecords > yearAndValue (即当 dateInRecords = 2，yearAndValue = 1时)，什么都不做
+      //如果dateInRecords > yearAndValue，什么都不做
     }
     duration
   }
