@@ -6,7 +6,7 @@ import org.apache.spark.Logging
 
 object Main extends Logging {
   def main(args: Array[String]) {
-    if (args == null || args.length == 0) {
+    if (Option(args).isEmpty || args.length == 0) {
       logError(Utils.wrapLog("请传入模型编号：001~005"))
       return
     }

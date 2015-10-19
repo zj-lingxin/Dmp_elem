@@ -1,7 +1,7 @@
 package com.asto.dmp.elem.util
 
 import java.text.SimpleDateFormat
-import java.util.Calendar
+import java.util.{Date, Calendar}
 
 object DateUtils {
   private val df = Calendar.getInstance()
@@ -93,9 +93,13 @@ object DateUtils {
   def strToCalendar(strDate: String, formatText: String = "yyyy-MM-dd"): Calendar = {
     val sdf= new SimpleDateFormat(formatText)
     val date = sdf.parse(strDate)
-    val  calendar = Calendar.getInstance()
+    val calendar = Calendar.getInstance()
     calendar.setTime(date)
     calendar
+  }
+  def strToDate(strDate: String, formatText: String = "yyyy-MM-dd"): Date = {
+    val sdf= new SimpleDateFormat(formatText)
+    sdf.parse(strDate)
   }
 
   def getTotalDayInMonth(strDate: String, formatText: String = "yyyy-MM-dd") =

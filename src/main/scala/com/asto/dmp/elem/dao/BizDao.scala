@@ -40,7 +40,7 @@ object BizDao extends DataSource {
 
   private def registerTempTableIfNotExist(inputFilePath: String,schema: String, tempTableName: String,separator: String) {
     //如果临时表未注册，就进行注册
-    if (!sqlContext.tableNames.exists(t => t == tempTableName)) {
+    if (!sqlContext.tableNames().contains(tempTableName)) {
       val fields = schema.split(",")
       val rowRDD = BaseContext.getSparkContext.textFile(inputFilePath).
         map(_.split(separator)).filter(x => x.length == fields.length).

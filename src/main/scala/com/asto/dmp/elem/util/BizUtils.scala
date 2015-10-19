@@ -12,6 +12,33 @@ object BizUtils {
     DateUtils.getCurrDate
   }
 
+  /**
+   * 1. 扣除特殊月(即2月)
+   * 2. 采集数据截止日期为15号之后(包含15号)，则包含当前月，否则从上个自然月算起。
+   */
+  def getInitYearAndMonth = {
+    val curDate = curDateInBiz
+    val curMonth = DateUtils.getCurrMonth
+    if (curDate < 15 && curMonth == 3) {
+      //如果当前月天数小于15，且当前月是3月份，那么要回退到一月份。
+      DateUtils.monthsAgo(2, "yyyy/M")
+    } else if (curDate < 15 && curMonth != 3) {
+      //如果当前月天数小于15，除3月份外，其他月份回退一个月。
+      DateUtils.monthsAgo(1, "yyyy/M")
+    } else if (curDate >= 15 && curMonth == 2) {
+
+      //如果当前月天数大于15，且当前月是2月份，那么回退一个月。
+      DateUtils.monthsAgo(1, "yyyy/M")
+    } else {
+      //如果当前月天数大于15，且当前月不是2月份，不需要回退。
+      DateUtils.getStrDate("yyyy/M")
+    }
+  }
+
+  def main(args: Array[String]) {
+
+  }
+
   def getDaysNumInMonth(strDate: String, formatText: String = "yyyy/M"): Int = {
     val paramYearAndMonth = DateUtils.cutYearMonthDay(strDate)
     val currYearAndMonth = DateUtils.getStrDate(formatText)
@@ -30,20 +57,21 @@ object BizUtils {
   def getLastMonths(num: Int) = {
     //放在内部可能在spark中会有问题
     def minusOneMonth(calendar: Calendar) {
-      calendar.add(Calendar.MONTH,-1)
+      calendar.add(Calendar.MONTH, -1)
       //2月份不计算在内
-      if(calendar.get(Calendar.MONTH) == 1)
-        calendar.add(Calendar.MONTH,-1)
+      if (calendar.get(Calendar.MONTH) == 1)
+        calendar.add(Calendar.MONTH, -1)
     }
     val calendar = Calendar.getInstance()
     if (curDateInBiz < 15) {
       minusOneMonth(calendar)
     }
     var list = scala.collection.mutable.ListBuffer[String]()
-    list += DateUtils.getStrDate(calendar,"yyyy/M")
+    list += DateUtils.getStrDate(calendar, "yyyy/M")
     (1 until num).foreach(a => {
       minusOneMonth(calendar)
-      list += DateUtils.getStrDate(calendar,"yyyy/M")})
+      list += DateUtils.getStrDate(calendar, "yyyy/M")
+    })
     list
   }
 
