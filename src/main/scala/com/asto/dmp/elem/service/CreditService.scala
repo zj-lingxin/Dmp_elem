@@ -8,15 +8,13 @@ import com.asto.dmp.elem.util.{BizUtils, DateUtils, FileUtils}
 
 class CreditService extends DataSource with scala.Serializable {
 
-
   def run(): Unit = {
     try {
-
       FileUtils.deleteHdfsFile(Constants.OutputPath.CREDIT_TEXT)
       FileUtils.deleteHdfsFile(Constants.OutputPath.CREDIT_PARQUET)
 
       //月刷单额
-      val monthCilckFramSales = sc.parallelize(Seq(
+      val monthFakedSales = sc.parallelize(Seq(
         ("	2015/6/13	", "	12574664669042353	", "	15453	", "	风云便当	", "	15.0 	", "	false	"),
         ("	2015/6/13	", "	12574865121584353	", "	15453	", "	风云便当	", "	24.0 	", "	true "),
         ("	2015/6/13	", "	12474664389438153	", "	15453	", "	风云便当	", "	16.0 	", "	true	"),
@@ -73,7 +71,7 @@ class CreditService extends DataSource with scala.Serializable {
         map(t => (t._1, t._2.sum)) //((2015/7,15453),37548.0)
 
       //月净营业额 = 月营业额 - 月刷单额
-      val monthNetSales = monthSales.leftOuterJoin(monthCilckFramSales). //((2015/7,15453),(37548.0,Some(80.0)))
+      val monthNetSales = monthSales.leftOuterJoin(monthFakedSales). //((2015/7,15453),(37548.0,Some(80.0)))
         map(t => (t._1, t._2._1 - t._2._2.getOrElse(0D))) //((2015/7,15453),37468.0)
 
       //得到近6个月的月份(当前月大于等于15号，算一个月；忽略2月)
@@ -118,31 +116,38 @@ class CreditService extends DataSource with scala.Serializable {
 
       val beta = salesRateWeighting.leftOuterJoin(dayAverageSales). //(15453,(0.2800160158853955,Some(1000.0)))
         map(t => (t._1, t._2._1.toDouble, t._2._2.getOrElse("0").toString.toDouble)).
-        map(t => (t._1,t._2,t._3,CreditService.getBeta(t._2, t._3))) //(15453,0.2800160158853955,2000.0,0.2)
+        map(t => (t._1, (t._2, t._3, CreditService.getBeta(t._2, t._3)))) //(15453,(0.2800160158853955,2000.0,0.2))
 
       //计算近12个月日营业额均值
+      val last12MothsList = BizUtils.getLastMonths(12)
+      val last12MonthsAvgSales = BizDao.getOrderProps(SQL().setSelect("order_date,shop_id,order_money")).
+        map(a => ((DateUtils.cutYearMonth(a(0).toString), a(1)), a(2).toString.toDouble)).
+        filter(t => last12MothsList.contains(t._1._1)). //((2014/10,15453),13.0)
+        groupByKey(). //((2014/10,15453),CompactBuffer(7.0, 12.0, 13.0, 11,...))
+        map(t => (t._1, t._2.sum)). //((2014/10,15453),113392.0)
+        map(t => (t._1, CreditService.getAvgSales(t._1._1, t._2))).
+        map(t => (t._1._2, t._2)).
+        reduceByKey(_ + _). //12个月日均销售总额 (15453,38746.96612903226)
+        map(t => (t._1.toString, t._2 / 12)) //近12个月日均营业额均值 (15453,3228.913844086022)
 
-      /*
-            val sql = SQL("order_id, shop_id, shop_name, custom_id, custom_name", "order_id = 12254695004719553 ")
-            BizDao.getOrderProps(sql).map(t=>(t(0),t(1))).take(10).foreach(println)*/
+      //刷单率
+      //餐厅Id、餐厅名称、	近6个月刷单金额、近6个月总营业额、刷单率
+      val fakedSalesRate = sc.parallelize(Seq(
+        ("	15453	", "	风云便当	", "23333", "233342", "0.1"),
+        ("	23112	", "	吉祥馄饨	", "45344", "453445", "0.1")
+      )).map(t => (t._1.trim, (t._2.trim, t._5.trim.toDouble))) //((2015/7,15453),80.0)
 
-      /*  val sql2 = SQL("order_id, shop_id, shop_name, custom_id, custom_name")
-        BizDao.getOrderProps(sql2).take(10).foreach(println)
+      //计算授信额度：授信额度=MIN[近12个月日营业额均值*（1-刷单率）*30*β，500000]
+      //输出：餐厅id、餐厅名称	、营业额加权环比增长率、日均净营业额、 贷款倍率、	近12个月日营业额均值	、刷单率、授信额度
+      val lineOfCredit = last12MonthsAvgSales.leftOuterJoin(fakedSalesRate). //(15453,(3228.913844086022,Some((风云便当,0.1))))
+        map(t => (t._1, (t._2._1, t._2._2.get._1, t._2._2.get._2))). //(15453,(3228.913844086022,风云便当,0.1))
+        leftOuterJoin(beta). //(餐厅id,((近12个月日营业额均值,餐厅名称,刷单率),Some((营业额加权环比增长率,日均净营业额,贷款倍率(即β)))))
+        map(t => (t._1, t._2._1._2, t._2._2.get._1, t._2._2.get._2, t._2._2.get._3, t._2._1._1, t._2._1._3)). //(餐厅id,餐厅名称,营业额加权环比增长率,日均净营业额,β,近12个月日均营业额均值,刷单率)
+        map(t => (t._1, t._2, t._3, t._4, t._5, t._6, t._7, Math.min(t._6 * (1 - t._7) * 30 * t._5, CreditService.loanCeiling)))
 
-        val sql3 = SQL()
-        BizDao.getOrderProps(sql3).take(10).foreach(println)
-
-        BizDao.getOrderProps().take(10).foreach(println)
-*/
-      //val sc.parallelize()
-
-      /**
-      val result = totalSales.map(t => (t._1, (t._2, t._2 / 12 * 1.5))).leftOuterJoin(tmpResult).map( t => (t._1, t._2._1._1, t._2._2.get._1, t._2._2.get._2, t._2._2.get._3, t._2._2.get._4,
-        t._2._2.get._5, t._2._1._2, t._2._2.get._6, t._2._2.get._7, t._2._2.get._10, t._2._2.get._11, Array(t._2._1._2, t._2._2.get._8).min))
-      result.toDF("shop_id", "前12个月销售总额", "resultSales", "β", "行业类型", "得分", "resultSales*β/12*授信月份数",
-        "前12个月销售总额/12*1.5", "行业风险限额", "产品限额", "刷单比率", "退款率", "授信额度").write.parquet(Constants.OutputPath.CREDIT_PARQUET)
-      result.map(_.productIterator.mkString(",")).coalesce(1).saveAsTextFile(Constants.OutputPath.CREDIT_TEXT)
-        * */
+      import sqlContext.implicits._
+      lineOfCredit.toDF("餐厅id", "餐厅名称", "营业额加权环比增长率", "日均净营业额", "贷款倍率", "近12个月日营业额均值", "刷单率", "授信额度").write.parquet(Constants.OutputPath.CREDIT_PARQUET)
+      lineOfCredit.map(_.productIterator.mkString(",")).coalesce(1).saveAsTextFile(Constants.OutputPath.CREDIT_TEXT)
     } catch {
       case t: Throwable =>
         // MailAgent(t, Constants.Mail.CREDIT_SUBJECT, Mail.getPropByKey("mail_to_credit")).sendMessage()
@@ -192,5 +197,4 @@ object CreditService {
     else
       0D
   }
-
 }
