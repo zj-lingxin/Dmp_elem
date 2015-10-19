@@ -13,7 +13,7 @@ object Constants {
     //项目数据存放的Hadoop的目录
     val HADOOP_DIR         = "hdfs://appcluster/elem/"
 
-    val LOG_WRAPPER = "######################"
+    val LOG_WRAPPER        = "######################"
   }
 
   /** 输入文件路径 **/

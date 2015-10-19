@@ -1,7 +1,7 @@
 package com.asto.dmp.elem.base
 
 import com.asto.dmp.elem.service._
-import com.asto.dmp.elem.util.Utils
+import com.asto.dmp.elem.util.{BizUtils, Utils}
 import org.apache.spark.Logging
 
 object Main extends Logging {
@@ -21,8 +21,8 @@ object Main extends Logging {
         logInfo(Utils.wrapLog("开始运行反欺诈模型(002)"))
         new AntiFraudService().run()
       case "003" =>
-        //评分模型
-        //暂无
+      //评分模型
+      //暂无
       case "004" =>
         //授信模型
         logInfo(Utils.wrapLog("开始运行授信模型(004)"))
@@ -31,11 +31,12 @@ object Main extends Logging {
         //贷后模型
         logInfo(Utils.wrapLog("开始运行贷后模型(005)"))
         new LoanAfterService().run()
-      case _     =>
+      case _ =>
         logError(s"传入参数错误!传入的是${args(0)},请传入001~005")
     }
 
     BaseContext.stopSparkContext()
     System.exit(0)
   }
+
 }

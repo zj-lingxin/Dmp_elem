@@ -7,11 +7,8 @@ import org.apache.spark.sql.Row
 object BizDao extends DataSource {
 
   private def getProps(inputFilePath: String, schema: String, tempTableName: String, sqlObj: SQL, separator: String = Constants.InputPath.SEPARATOR) = {
-    val fields = schema.split(",")
-    val rowRDD = BaseContext.getSparkContext.textFile(inputFilePath).
-      map(_.split(separator)).filter(x => x.length == fields.length).
-      map(fields => for (field <- fields) yield field.trim).map(fields => Row(fields: _*))
-    sqlContext.createDataFrame(rowRDD, getSchema(schema)).registerTempTable(tempTableName)
+
+    registerTempTableIfNotExist(inputFilePath, schema, tempTableName, separator)
 
     var _sql = s"SELECT ${sqlObj.getSelect} FROM $tempTableName"
 
@@ -30,7 +27,7 @@ object BizDao extends DataSource {
     if (Option(sqlObj.getLimit).isDefined)
       _sql += s" LIMIT ${sqlObj.getLimit}"
 
-    logInfo(Utils.wrapLog(s"执行Sql:${_sql} ####################"))
+    logInfo(Utils.wrapLog(s"执行Sql:${_sql}"))
     val rdd = sqlContext.sql(_sql).map(a => a.toSeq.toArray)
 
     if (Option(sqlObj.getOrderBy).isDefined) {
@@ -39,6 +36,19 @@ object BizDao extends DataSource {
       sqlContext.sql("SET spark.sql.shuffle.partitions=200")
     }
     rdd
+  }
+
+  private def registerTempTableIfNotExist(inputFilePath: String,schema: String, tempTableName: String,separator: String) {
+    //如果临时表未注册，就进行注册
+    if (!sqlContext.tableNames.exists(t => t == tempTableName)) {
+      val fields = schema.split(",")
+      val rowRDD = BaseContext.getSparkContext.textFile(inputFilePath).
+        map(_.split(separator)).filter(x => x.length == fields.length).
+        map(fields => for (field <- fields) yield field.trim).
+        map(fields => Row(fields: _*))
+      sqlContext.createDataFrame(rowRDD, getSchema(schema)).registerTempTable(tempTableName)
+      logInfo(Utils.wrapLog(s"注册临时表：$tempTableName"))
+    }
   }
 
   def getOrderProps(sql: SQL = new SQL()) = getProps(Constants.InputPath.ORDER, Constants.Schema.ORDER, "orderTable", sql)
