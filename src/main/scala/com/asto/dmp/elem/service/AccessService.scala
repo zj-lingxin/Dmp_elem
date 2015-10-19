@@ -29,26 +29,22 @@ object AccessService {
     DateUtils.getStrDate(cal, formatText)
   }
 
-  def getDuration(list: List[String]): Int = {
-    var yearAndValue = BizUtils.getInitYearAndMonth
-    val sortedList = list.sortWith((x, y) => if (DateUtils.strToDate(x, "yyyy/M").getTime > DateUtils.strToDate(y, "yyyy/M").getTime) true else false)
+  private def getDuration(list: List[String]) = {
+    val sortedList = list.map(DateUtils.strToStr(_, "yyyy/M", "yyyy/MM")).sorted.reverse
+    var yearAndValue = BizUtils.getInitYearAndMonth("yyyy/MM")
     var duration = 0
     var end = false
-    for ( dateInRecords <- sortedList if !end) {
-      val dateInRecordsLong = DateUtils.strToDate(dateInRecords, "yyyy/M").getTime
-      val yearAndValueLong = DateUtils.strToDate(yearAndValue, "yyyy/M").getTime
-      if (dateInRecordsLong == yearAndValueLong) {
-        if (dateInRecords == yearAndValue) {
-          duration += 1
-          if (yearAndValue.contains("/3")) {
-            yearAndValue = backMonths(yearAndValue, 2, "yyyy/M")
-          } else {
-            yearAndValue = backMonths(yearAndValue, 1, "yyyy/M")
-          }
-        }
-      } else if (dateInRecordsLong < yearAndValueLong){
+    sortedList.toStream.takeWhile(_ => !end).foreach { dateInRecords =>
+      if (dateInRecords == yearAndValue) {
+        duration += 1
+        if (yearAndValue.contains("/03"))
+          yearAndValue = backMonths(yearAndValue, 2, "yyyy/MM")
+        else
+          yearAndValue = backMonths(yearAndValue, 1, "yyyy/MM")
+      } else if (dateInRecords < yearAndValue) {
         end = true
       }
+      //如果dateInRecords > yearAndValue (即当 dateInRecords = 2，yearAndValue = 1时)，什么都不做
     }
     duration
   }

@@ -97,9 +97,19 @@ object DateUtils {
     calendar.setTime(date)
     calendar
   }
+
   def strToDate(strDate: String, formatText: String = "yyyy-MM-dd"): Date = {
     val sdf= new SimpleDateFormat(formatText)
     sdf.parse(strDate)
+  }
+
+  def strToStr(strDate: String, oldFormat: String, newFormat: String) =
+    dateToStr(strToDate(strDate, oldFormat),newFormat)
+
+
+  def dateToStr(date: Date, formatText: String = "yyyy-MM-dd" ): String = {
+    val sdf= new SimpleDateFormat(formatText)
+    sdf.format(date)
   }
 
   def getTotalDayInMonth(strDate: String, formatText: String = "yyyy-MM-dd") =
