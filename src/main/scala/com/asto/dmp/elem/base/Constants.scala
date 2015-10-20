@@ -35,15 +35,18 @@ object Constants {
   /** 输出文件路径 **/
   object OutputPath {
     val SEPARATOR = ","
-    private val TODAY    = DateUtils.getStrDate("yyyyMM/dd")
-    private val DIR      = s"${App.HADOOP_DIR}/output"
-    //刷单结果路径
-    val FRAUD_PARQUET    = s"$DIR/parquet/$TODAY/fraud"
-    //得分结果路径
-    val SCORE_TEXT       = s"$DIR/text/$TODAY/score"
+    private val TODAY        = DateUtils.getStrDate("yyyyMM/dd")
+    private val DIR          = s"${App.HADOOP_DIR}/output"
+
+    //反欺诈结果路径
+    val ANTI_FRAUD_TEXT      = s"$DIR/text/$TODAY/fraud"
+    val ANTI_FRAUD_PARQUET   = s"$DIR/parquet/$TODAY/fraud"
+
     //授信结果路径
-    val CREDIT_TEXT      = s"$DIR/text/$TODAY/credit"
-    val CREDIT_PARQUET   = s"$DIR/parquet/$TODAY/credit"
+    val CREDIT_TEXT          = s"$DIR/text/$TODAY/credit"
+    val CREDIT_PARQUET       = s"$DIR/parquet/$TODAY/credit"
+
+
   }
 
   /** 表的模式 **/

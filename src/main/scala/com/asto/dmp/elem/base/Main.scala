@@ -1,9 +1,7 @@
 package com.asto.dmp.elem.base
 
-import java.util.Calendar
-
 import com.asto.dmp.elem.service._
-import com.asto.dmp.elem.util.{DateUtils, Utils}
+import com.asto.dmp.elem.util.Utils
 import org.apache.spark.Logging
 
 object Main extends Logging {

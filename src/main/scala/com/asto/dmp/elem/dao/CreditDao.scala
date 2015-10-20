@@ -30,9 +30,9 @@ class CreditDao extends scala.Serializable  {
   def betaInfo =
     sqlContext.sql("select * from beta ").map(t => (t(0).toString, (t(1).toString.toInt, t(2).toString.toInt, t(3).toString.toInt, t(4).toString.toInt, t(5).toString.toDouble * 1.25)))
 
-  def shuadanRate = {
+/*  def shuadanRate = {
     //授信结果路径
     sqlContext.read.parquet(Constants.OutputPath.FRAUD_PARQUET).registerTempTable("shuadan")
     sqlContext.sql("select * from shuadan").map(t => Pair[String, Double](t(0).toString, if (t(1) == null) 0D else t(1).toString.toDouble))
-  }
+  }*/
 }
