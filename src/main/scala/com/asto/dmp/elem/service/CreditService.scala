@@ -75,7 +75,7 @@ class CreditService extends DataSource with scala.Serializable {
         map(t => (t._1, t._2._1 - t._2._2.getOrElse(0D))) //((2015/7,15453),37468.0)
 
       //得到近6个月的月份(当前月大于等于15号，算一个月；忽略2月)
-      val fiveMonths = BizUtils.getLastMonths(6)
+      val fiveMonths = BizUtils.getLastMonths(6,"yyyy/M")
       //最近一个月不需要，去除。
       fiveMonths.remove(0, 1)
 
@@ -119,7 +119,7 @@ class CreditService extends DataSource with scala.Serializable {
         map(t => (t._1, (t._2, t._3, CreditService.getBeta(t._2, t._3)))) //(15453,(0.2800160158853955,2000.0,0.2))
 
       //计算近12个月日营业额均值
-      val last12MothsList = BizUtils.getLastMonths(12)
+      val last12MothsList = BizUtils.getLastMonths(12,"yyyy/M")
       val last12MonthsAvgSales = BizDao.getOrderProps(SQL().setSelect("order_date,shop_id,order_money")).
         map(a => ((DateUtils.cutYearMonth(a(0).toString), a(1)), a(2).toString.toDouble)).
         filter(t => last12MothsList.contains(t._1._1)). //((2014/10,15453),13.0)
@@ -140,11 +140,11 @@ class CreditService extends DataSource with scala.Serializable {
       //计算授信额度：授信额度=MIN[近12个月日营业额均值*（1-刷单率）*30*β，500000]
       //输出：餐厅id、餐厅名称	、营业额加权环比增长率、日均净营业额、 贷款倍率、	近12个月日营业额均值	、刷单率、授信额度
       val lineOfCredit = last12MonthsAvgSales.leftOuterJoin(fakedSalesRate). //(15453,(3228.913844086022,Some((风云便当,0.1))))
+        filter(t => t._2._2.isDefined).
         map(t => (t._1, (t._2._1, t._2._2.get._1, t._2._2.get._2))). //(15453,(3228.913844086022,风云便当,0.1))
         leftOuterJoin(beta). //(餐厅id,((近12个月日营业额均值,餐厅名称,刷单率),Some((营业额加权环比增长率,日均净营业额,贷款倍率(即β)))))
         map(t => (t._1, t._2._1._2, t._2._2.get._1, t._2._2.get._2, t._2._2.get._3, t._2._1._1, t._2._1._3)). //(餐厅id,餐厅名称,营业额加权环比增长率,日均净营业额,β,近12个月日均营业额均值,刷单率)
         map(t => (t._1, t._2, t._3, t._4, t._5, t._6, t._7, Math.min(t._6 * (1 - t._7) * 30 * t._5, CreditService.loanCeiling)))
-
       import sqlContext.implicits._
       lineOfCredit.toDF("餐厅id", "餐厅名称", "营业额加权环比增长率", "日均净营业额", "贷款倍率", "近12个月日营业额均值", "刷单率", "授信额度").write.parquet(Constants.OutputPath.CREDIT_PARQUET)
       lineOfCredit.map(_.productIterator.mkString(",")).coalesce(1).saveAsTextFile(Constants.OutputPath.CREDIT_TEXT)

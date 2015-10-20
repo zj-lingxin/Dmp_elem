@@ -3,8 +3,8 @@ package com.asto.dmp.elem.util
 import java.text.SimpleDateFormat
 import java.util.{Date, Calendar}
 
-object DateUtils {
-  private val df = Calendar.getInstance()
+object DateUtils extends scala.Serializable{
+  private val cal = Calendar.getInstance()
 
   /**
    * 获取当前系统日期。
@@ -67,21 +67,21 @@ object DateUtils {
    * 获取当前年份
    */
   def getCurrYear: Int = {
-    df.get(Calendar.YEAR)
+    cal.get(Calendar.YEAR)
   }
 
   /**
    * 获取当前月份
    */
   def getCurrMonth: Int = {
-    df.get(Calendar.MONTH) + 1
+    cal.get(Calendar.MONTH) + 1
   }
 
   /**
    * 获取当前日
    */
   def getCurrDate: Int = {
-    df.get(Calendar.DATE)
+    cal.get(Calendar.DATE)
   }
 
   /**
@@ -114,5 +114,25 @@ object DateUtils {
 
   def getTotalDayInMonth(strDate: String, formatText: String = "yyyy-MM-dd") =
     strToCalendar(strDate, formatText).getActualMaximum(Calendar.DAY_OF_MONTH)
+
+  /**
+   * 获取属于哪个季度
+   * @param strDate
+   * @return
+   */
+  def getQuarterStartTime(strDate: String, formatText: String): String = {
+    val c = strToCalendar(strDate, formatText)
+    val currentMonth = c.get(Calendar.MONTH) + 1
+    if (currentMonth >= 1 && currentMonth <= 3)
+      c.set(Calendar.MONTH, 0)
+    else if (currentMonth >= 4 && currentMonth <= 6)
+      c.set(Calendar.MONTH, 3)
+    else if (currentMonth >= 7 && currentMonth <= 9)
+      c.set(Calendar.MONTH, 6)
+    else if (currentMonth >= 10 && currentMonth <= 12)
+      c.set(Calendar.MONTH, 9)
+    c.set(Calendar.DATE, 1)
+    new SimpleDateFormat(formatText).format(c.getTime)
+  }
 
 }

@@ -7,6 +7,7 @@ import java.util.Calendar
  * 注意：如果这些方法不仅仅在该项目中能用到，而且可能在未来的项目中也能用到，那么请写到Utils中
  */
 object BizUtils {
+
   //当前月的几号可能会变
   def curDateInBiz = {
     DateUtils.getCurrDate
@@ -50,7 +51,7 @@ object BizUtils {
    * 如近12个月实际为从近13个月数据中剔除2月份数据得到的。
    * 如部分商户的订单数据只有N个月的（N<12），则也应扣除特殊月份，即实际有效月份数为N-1个月。
    */
-  def getLastMonths(num: Int) = {
+  def getLastMonths(num: Int, formatText: String) = {
     //放在内部可能在spark中会有问题
     def minusOneMonth(calendar: Calendar) {
       calendar.add(Calendar.MONTH, -1)
@@ -63,10 +64,10 @@ object BizUtils {
       minusOneMonth(calendar)
     }
     var list = scala.collection.mutable.ListBuffer[String]()
-    list += DateUtils.getStrDate(calendar, "yyyy/M")
+    list += DateUtils.getStrDate(calendar, formatText)
     (1 until num).foreach(a => {
       minusOneMonth(calendar)
-      list += DateUtils.getStrDate(calendar, "yyyy/M")
+      list += DateUtils.getStrDate(calendar, formatText)
     })
     list
   }
