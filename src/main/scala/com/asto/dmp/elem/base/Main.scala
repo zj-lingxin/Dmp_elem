@@ -10,28 +10,32 @@ import org.apache.spark.Logging
 object Main extends Logging {
   def main(args: Array[String]) {
     if (Option(args).isEmpty || args.length == 0) {
-      logError(Utils.wrapLog("请传入模型编号：001~005"))
+      logError(Utils.wrapLog("请传入模型编号：1~5"))
       return
     }
+
     args(0) match {
-      case "001" =>
+      case "1" =>
         //反欺诈模型
-        logInfo(Utils.wrapLog(s"开始运行反欺诈模型(${args(0)})"))
         new AntiFraudService().run()
-      case "002" =>
+      case "2" =>
         //准入模型
-        logInfo(Utils.wrapLog(s"开始运行准入模型(${args(0)})"))
         new AccessService().run()
-      case "003" =>
+      case "3" =>
         //授信模型
-        logInfo(Utils.wrapLog(s"开始运行授信模型(${args(0)})"))
         new CreditService().run()
-      case "004" =>
+      case "4" =>
         //贷后模型
-        logInfo(Utils.wrapLog(s"开始运行贷后模型(${args(0)})"))
+        new LoanAfterService().run()
+      case "5" =>
+        //所有模型一起运行
+        logInfo(Utils.wrapLog("所有模型一起运行"))
+        new AntiFraudService().run()
+        new AccessService().run()
+        new CreditService().run()
         new LoanAfterService().run()
       case _ =>
-        logError(s"传入参数错误!传入的是${args(0)},请传入001~004")
+        logError(s"传入参数错误!传入的是${args(0)},请传入1~5")
     }
 
     BaseContext.stopSparkContext()

@@ -2,13 +2,14 @@ package com.asto.dmp.elem.service
 
 import com.asto.dmp.elem.base._
 import com.asto.dmp.elem.dao.AntiFraudDao
-import com.asto.dmp.elem.util.{DateUtils, BizUtils, FileUtils}
+import com.asto.dmp.elem.util.{Utils, DateUtils, BizUtils, FileUtils}
 
 class AntiFraudService extends DataSource with Serializable {
 
   def run(): Unit = {
 
     try {
+      logInfo(Utils.wrapLog("开始运行反欺诈模型"))
       //输出1：订单ID, 订单日期, 餐厅ID ,餐厅名称 ,下单客户ID	,下单时间	,订单额 ,刷单指标值1	,刷单指标值2,	刷单指标值3,	刷单指标值4,	刷单指标值5,	是否刷单
       val FQZ1 = AntiFraudDao.getFQZ1Info.map(t => (t._2.toString, (t._3, t._4))) // (订单号,(FQZ1,true/false))
       val FQZ2 = AntiFraudDao.getFQZ2Info.map(t => (t._2.toString, (t._3, t._4))) // (订单号,(FQZ2,true/false))*/
@@ -59,6 +60,8 @@ class AntiFraudService extends DataSource with Serializable {
       case t: Throwable =>
         // MailAgent(t, Constants.Mail.CREDIT_SUBJECT, Mail.getPropByKey("mail_to_credit")).sendMessage()
         logError(Constants.Mail.ANTI_FRAUD_SUBJECT, t)
+    } finally {
+      logInfo(Utils.wrapLog("反欺诈模型运行结束"))
     }
   }
 }

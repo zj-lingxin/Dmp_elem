@@ -24,14 +24,6 @@ object Constants {
     val ORDER              = s"$DIR/order/*"
   }
 
-  /** 中间文件路径 **/
-  object MiddlePath {
-    val SEPARATOR = ","
-    private val DIR        = s"${App.HADOOP_DIR}/middle"
-    val BETA               = s"$DIR/beta/*"
-    val INDUSTRY_RELATION  = s"$DIR/industry_relation" //这里不需要“/*”
-  }
-
   /** 输出文件路径 **/
   object OutputPath {
     val SEPARATOR = ","
@@ -56,8 +48,12 @@ object Constants {
 
     //反欺诈结果输出1：订单ID, 订单日期, 餐厅ID ,餐厅名称 ,下单客户ID	,下单时间	,订单额 ,刷单指标值1	,刷单指标值2,	刷单指标值3,	刷单指标值4,	刷单指标值5,	是否刷单
     val FAKED_INFO = "order_id:String,order_date:String,shop_id:String,shop_name:String,custom_id:String,place_order_time:String,order_money:String,fqz1:String,fqz2:String,fqz3:String,fqz4:String,fqz5:String,is_faked:String"
+
     //反欺诈结果输出2：餐厅ID,餐厅名称,近6个月刷单金额	,近6个月总营业额	,刷单率
     val FAKED_RATE = "shop_id:String,shop_name:String,last_six_months_faked_sales:String,last_six_months_total_sales:String,faked_rate:String"
+
+    //准入结果输出：餐厅ID,餐厅名称,平台连续经营时间,日均净营业额,基于3个月的营业额增长率,基于1个月的营业额增长率,刷单率,是否准入)
+    val ACCESS_INFO = "shop_id:String,shop_name:String,shop_duration:String,day_average_sales:String,sale_rate_in_three_months:String,sale_rate_in_one_months:String,faked_sales_rate:String,is_access:String"
   }
 
   /** 邮件发送功能相关常量 **/
