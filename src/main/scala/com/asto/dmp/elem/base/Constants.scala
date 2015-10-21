@@ -39,9 +39,10 @@ object Constants {
     private val DIR          = s"${App.HADOOP_DIR}/output"
 
     //反欺诈结果路径
-    val ANTI_FRAUD_TEXT      = s"$DIR/text/$TODAY/fraud"
-    val ANTI_FRAUD_PARQUET   = s"$DIR/parquet/$TODAY/fraud"
-
+    val ANTI_FRAUD_FAKED_INFO_TEXT      = s"$DIR/text/$TODAY/fraud/fakedInfo"
+    val ANTI_FRAUD_FAKED_INFO_PARQUET   = s"$DIR/parquet/$TODAY/fraud/fakedInfo"
+    val ANTI_FRAUD_FAKED_RATE_TEXT      = s"$DIR/text/$TODAY/fraud/fakedRate"
+    val ANTI_FRAUD_FAKED_RATE_PARQUET   = s"$DIR/parquet/$TODAY/fraud/fakedRate"
     //授信结果路径
     val CREDIT_TEXT          = s"$DIR/text/$TODAY/credit"
     val CREDIT_PARQUET       = s"$DIR/parquet/$TODAY/credit"
