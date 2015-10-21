@@ -19,7 +19,7 @@ object Constants {
   /** 输入文件路径 **/
   object InputPath {
     //hdfs中表的字段的分隔符
-    val SEPARATOR = "@#@"
+    val SEPARATOR = "\t"
     private val DIR        = s"${App.HADOOP_DIR}/input"
     val ORDER              = s"$DIR/order/*"
   }
@@ -40,22 +40,24 @@ object Constants {
 
     //反欺诈结果路径
     val ANTI_FRAUD_FAKED_INFO_TEXT      = s"$DIR/text/$TODAY/fraud/fakedInfo"
-    val ANTI_FRAUD_FAKED_INFO_PARQUET   = s"$DIR/parquet/$TODAY/fraud/fakedInfo"
     val ANTI_FRAUD_FAKED_RATE_TEXT      = s"$DIR/text/$TODAY/fraud/fakedRate"
-    val ANTI_FRAUD_FAKED_RATE_PARQUET   = s"$DIR/parquet/$TODAY/fraud/fakedRate"
     //授信结果路径
     val CREDIT_TEXT          = s"$DIR/text/$TODAY/credit"
-    val CREDIT_PARQUET       = s"$DIR/parquet/$TODAY/credit"
-
-
+    //授信结果路径
+    val ACCESS_TEXT          = s"$DIR/text/$TODAY/access"
   }
 
   /** 表的模式 **/
   object Schema {
-    //订单ID, 餐厅ID, 餐厅Id, 餐厅名称, 订单详情json, 下单客户ID, 客户名称, 城市ID, 订单额, 退款状态, 下单时间, 手机号, 下单配送地址, 下单经纬度d
-    val ORDER = "order_date:String, order_id:String, shop_id:String, shop_name:String, order_details:String, " +
+    //订单表：订单ID, 餐厅ID, 餐厅Id, 餐厅名称, 下单客户ID, 客户名称, 城市ID, 订单额, 退款状态, 下单时间, 手机号, 下单配送地址, 下单经纬度d
+    val ORDER = "order_date:String, order_id:String, shop_id:String, shop_name:String, " +
       "custom_id:String, custom_name:String, city_id:String, order_money:String, refund_status:String, " +
       "place_order_time:String, custom_mobile:String, delivery_address:String, lng_lat:String"
+
+    //反欺诈结果输出1：订单ID, 订单日期, 餐厅ID ,餐厅名称 ,下单客户ID	,下单时间	,订单额 ,刷单指标值1	,刷单指标值2,	刷单指标值3,	刷单指标值4,	刷单指标值5,	是否刷单
+    val FAKED_INFO = "order_id:String,order_date:String,shop_id:String,shop_name:String,custom_id:String,place_order_time:String,order_money:String,fqz1:String,fqz2:String,fqz3:String,fqz4:String,fqz5:String,is_faked:String"
+    //反欺诈结果输出2：餐厅ID,餐厅名称,近6个月刷单金额	,近6个月总营业额	,刷单率
+    val FAKED_RATE = "shop_id:String,shop_name:String,last_six_months_faked_sales:String,last_six_months_total_sales:String,faked_rate:String"
   }
 
   /** 邮件发送功能相关常量 **/

@@ -4,6 +4,9 @@ import com.asto.dmp.elem.service._
 import com.asto.dmp.elem.util.Utils
 import org.apache.spark.Logging
 
+/**
+ * 注意：店铺经纬度风控还未给出 需要加入真数据~~~~~~~~~~~需要加入真数据~~~~~~~~~~需要加入真数据,重要的事说三遍！
+ */
 object Main extends Logging {
   def main(args: Array[String]) {
     if (Option(args).isEmpty || args.length == 0) {
@@ -32,6 +35,5 @@ object Main extends Logging {
     }
 
     BaseContext.stopSparkContext()
-    System.exit(0)
   }
 }

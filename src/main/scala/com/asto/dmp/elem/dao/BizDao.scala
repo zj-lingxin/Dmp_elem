@@ -42,15 +42,16 @@ object BizDao extends DataSource {
     //如果临时表未注册，就进行注册
     if (!sqlContext.tableNames().contains(tempTableName)) {
       val fields = schema.split(",")
-      val rowRDD = BaseContext.getSparkContext.textFile(inputFilePath).
-        map(_.split(separator)).filter(x => x.length == fields.length).
-        map(fields => for (field <- fields) yield field.trim).
-        map(fields => Row(fields: _*))
+      val rowRDD = BaseContext.getSparkContext.textFile(inputFilePath)
+        .map(_.split(separator)).filter(x => x.length == fields.length)
+        .map(fields => for (field <- fields) yield field.trim)
+        .map(fields => Row(fields: _*))
       sqlContext.createDataFrame(rowRDD, getSchema(schema)).registerTempTable(tempTableName)
       logInfo(Utils.wrapLog(s"注册临时表：$tempTableName"))
     }
   }
 
   def getOrderProps(sql: SQL = new SQL()) = getProps(Constants.InputPath.ORDER, Constants.Schema.ORDER, "orderTable", sql)
-
+  def getFakedInfoProps(sql: SQL = new SQL()) = getProps(Constants.OutputPath.ANTI_FRAUD_FAKED_INFO_TEXT, Constants.Schema.FAKED_INFO, "fakedInfo", sql, Constants.OutputPath.SEPARATOR)
+  def getFakedRateProps(sql: SQL = new SQL()) = getProps(Constants.OutputPath.ANTI_FRAUD_FAKED_RATE_TEXT, Constants.Schema.FAKED_RATE, "fakedRate", sql, Constants.OutputPath.SEPARATOR)
 }

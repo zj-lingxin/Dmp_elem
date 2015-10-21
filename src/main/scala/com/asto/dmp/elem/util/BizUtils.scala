@@ -2,6 +2,9 @@ package com.asto.dmp.elem.util
 
 import java.util.Calendar
 
+import com.asto.dmp.elem.base.{BaseContext, Constants}
+import scala.collection._
+
 /**
  * 该类中定义的是跟业务相关的一些共用方法。这些方法必须是在这个项目中自己能够用到的，并且其他同事也可能用到的方法。
  * 注意：如果这些方法不仅仅在该项目中能用到，而且可能在未来的项目中也能用到，那么请写到Utils中
@@ -11,6 +14,30 @@ object BizUtils {
   //当前月的几号可能会变
   def curDateInBiz = {
     DateUtils.getCurrDate
+  }
+
+  /**
+   * 根据业务，如果传入的是当前月，那么说明当前月的天数是>=15的。当前月的当前天数(15~31)
+   */
+  def getMonthAndDaysNumMap(monthNums: Int, formatText: String): mutable.Map[String, Int] = {
+    getMonthAndDaysNumMap(getLastMonths(monthNums, formatText: String), formatText)
+  }
+
+  def getMonthAndDaysNumMap(monthsList: scala.collection.mutable.ListBuffer[String], formatText: String): mutable.Map[String, Int] = {
+    val monthAndDaysNumMap = scala.collection.mutable.Map[String, Int]()
+    val currentMonths = DateUtils.getStrDate(formatText)
+    monthsList.foreach { month =>
+      //当前月，取当前天数
+      if (currentMonths == month) {
+        if (curDateInBiz < 15) {
+          throw new Exception("当前月的天数不能小于15号，传入的month参数可能出错了")
+        }
+        monthAndDaysNumMap += month -> curDateInBiz
+      } else {
+        monthAndDaysNumMap += month -> (DateUtils.strToCalendar(month, formatText).getActualMaximum(Calendar.DATE))
+      }
+    }
+    monthAndDaysNumMap
   }
 
   /**
@@ -63,13 +90,25 @@ object BizUtils {
     if (curDateInBiz < 15) {
       minusOneMonth(calendar)
     }
-    var list = scala.collection.mutable.ListBuffer[String]()
+    var list = mutable.ListBuffer[String]()
     list += DateUtils.getStrDate(calendar, formatText)
     (1 until num).foreach(a => {
       minusOneMonth(calendar)
       list += DateUtils.getStrDate(calendar, formatText)
     })
     list
+  }
+
+  //remember delete!!
+  def tempConvertData(): Unit = {
+    BaseContext.getSparkContext.textFile(Constants.InputPath.ORDER).map(_.split("\t")).filter(_.length == 13).map(_.toList.mkString("\t")).coalesce(1).saveAsTextFile("hdfs://appcluster/elem/input/order2")
+  }
+
+  //remember delete!!
+  def testTempConvert = {
+    val rdd = BaseContext.getSparkContext.textFile("hdfs://appcluster/elem/input/order").map(_.split("\t")).cache
+    rdd.map(_.length).distinct().foreach(println)
+    rdd.map(a => (a(2), a(3))).distinct.foreach(println)
   }
 
 }
