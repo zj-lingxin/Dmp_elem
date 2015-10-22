@@ -1,7 +1,7 @@
 package com.asto.dmp.elem.dao
 
 import java.util.Calendar
-import com.asto.dmp.elem.base.{BaseContext, SQL}
+import com.asto.dmp.elem.base.{Contexts, SQL}
 import com.asto.dmp.elem.util.{Utils, DateUtils, BizUtils}
 import org.apache.spark.Logging
 
@@ -64,7 +64,7 @@ object AntiFraudDao extends Logging {
    */
   def getFQZ4Info = {
     //注意：店铺经纬度风控还未给出 需要加入真数据~~~~~~~~~~~需要加入真数据~~~~~~~~~~需要加入真数据,重要的事说三遍！
-    val shopRDD = BaseContext.getSparkContext.parallelize(Seq(("15453", "120.163436", "30.326016"), ("17644", "120.026576", "30.216287")))
+    val shopRDD = Contexts.getSparkContext.parallelize(Seq(("15453", "120.163436", "30.326016"), ("17644", "120.026576", "30.216287")))
       .map(t => (t._1.toString, (t._2, t._3)))
     BizUtils.getLastMonths(12, "yyyy/M")
     val unFilterRDD = BizDao.getOrderProps(SQL().setSelect("order_id,order_date,shop_id,custom_id,lng_lat"))

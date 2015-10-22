@@ -51,13 +51,17 @@ object DateUtils extends scala.Serializable{
     getStrDate(cal, formatText)
   }
 
-  //截取出例如：2015-04-03、2015-4-3、2015/04/03、2015/4/3这样的字符串
+  /**
+   * 截取出例如：2015-04-03、2015-4-3、2015/04/03、2015/4/3这样的字符串
+   */
   def cutYearMonthDay(strDate: String) = {
     val regex = """\d{4}(/|-)\d{1,2}(/|-)\d{1,2}""".r
     regex.findFirstIn(strDate).getOrElse("")
   }
 
-  //截取出例如：2015-04、2015-4、2015/04、2015/4这样的字符串
+  /**
+   * 截取出例如：2015-04、2015-4、2015/04、2015/4这样的字符串
+   */
   def cutYearMonth(strDate: String) = {
     val regex = """\d{4}(/|-)\d{1,2}""".r
     regex.findFirstIn(strDate).getOrElse("")
@@ -86,9 +90,6 @@ object DateUtils extends scala.Serializable{
 
   /**
    * 将String类型的日期转化为Calendar
-   * @param strDate
-   * @param formatText
-   * @return
    */
   def strToCalendar(strDate: String, formatText: String = "yyyy-MM-dd"): Calendar = {
     val sdf= new SimpleDateFormat(formatText)
@@ -117,8 +118,6 @@ object DateUtils extends scala.Serializable{
 
   /**
    * 获取属于哪个季度
-   * @param strDate
-   * @return
    */
   def getQuarterStartTime(strDate: String, formatText: String): String = {
     val c = strToCalendar(strDate, formatText)

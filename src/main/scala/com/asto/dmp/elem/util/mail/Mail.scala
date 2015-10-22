@@ -28,7 +28,7 @@ object Mail {
     prop.put("mail_to_score", Constants.Mail.TO_SCORE)
     prop.put("mail_to_access", Constants.Mail.TO_ACCESS)
     prop.put("mail_to_credit", Constants.Mail.TO_CREDIT)
-    prop.put("mail_to_loan_after", Constants.Mail.TO_LOAN_AFTER)
+    prop.put("mail_to_loan_warning", Constants.Mail.TO_LOAN_WARNING)
   }
 
   def getPropByKey(propertyKey: String): String = {

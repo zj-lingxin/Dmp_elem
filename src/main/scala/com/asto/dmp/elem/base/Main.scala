@@ -26,18 +26,18 @@ object Main extends Logging {
         new CreditService().run()
       case "4" =>
         //贷后模型
-        new LoanAfterService().run()
+        new LoanWarningService().run()
       case "5" =>
         //所有模型一起运行
         logInfo(Utils.wrapLog("所有模型一起运行"))
         new AntiFraudService().run()
         new AccessService().run()
         new CreditService().run()
-        new LoanAfterService().run()
+        new LoanWarningService().run()
       case _ =>
         logError(s"传入参数错误!传入的是${args(0)},请传入1~5")
     }
 
-    BaseContext.stopSparkContext()
+    Contexts.stopSparkContext()
   }
 }

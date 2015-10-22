@@ -1,7 +1,7 @@
 package com.asto.dmp.elem.dao
 
 import java.util.Calendar
-import com.asto.dmp.elem.base.{BaseContext, SQL}
+import com.asto.dmp.elem.base.{Contexts, SQL}
 import com.asto.dmp.elem.util.{BizUtils, DateUtils}
 
 object CreditDao extends scala.Serializable  {
@@ -82,7 +82,7 @@ object CreditDao extends scala.Serializable  {
       .leftOuterJoin(RiAddOne)
 
     //营业额加权环比增长率
-    BaseContext.getSparkContext.parallelize(monthsAndWeights)
+    Contexts.getSparkContext.parallelize(monthsAndWeights)
       .leftOuterJoin(monthNetSalesNeeds)
       .filter(t => t._2._2.isDefined)
       .map(t => (t._1, t._2._1, t._2._2.get._1._1, t._2._2.get._1._2, t._2._2.get._2.getOrElse(0D))) //(2015/7,0.15,15453,1208.6451612903227,748.5967741935484)

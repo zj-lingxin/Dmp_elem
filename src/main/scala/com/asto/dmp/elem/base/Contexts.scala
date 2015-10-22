@@ -5,7 +5,7 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{Logging, SparkConf, SparkContext}
 
-object BaseContext extends Logging with scala.Serializable {
+object Contexts extends Logging with scala.Serializable {
   private var _sc: SparkContext = _
   private var _hiveContext: HiveContext = _
   private var _sqlContext: SQLContext = _

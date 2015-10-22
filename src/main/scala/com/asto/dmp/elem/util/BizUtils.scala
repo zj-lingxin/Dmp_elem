@@ -2,7 +2,7 @@ package com.asto.dmp.elem.util
 
 import java.util.Calendar
 
-import com.asto.dmp.elem.base.{BaseContext, Constants}
+import com.asto.dmp.elem.base.{Contexts, Constants}
 import scala.collection._
 
 /**
@@ -34,7 +34,7 @@ object BizUtils {
         }
         monthAndDaysNumMap += month -> curDateInBiz
       } else {
-        monthAndDaysNumMap += month -> (DateUtils.strToCalendar(month, formatText).getActualMaximum(Calendar.DATE))
+        monthAndDaysNumMap += month -> DateUtils.strToCalendar(month, formatText).getActualMaximum(Calendar.DATE)
       }
     }
     monthAndDaysNumMap
@@ -101,14 +101,14 @@ object BizUtils {
 
   //remember delete!!
   def tempConvertData(): Unit = {
-    BaseContext.getSparkContext.textFile(Constants.InputPath.ORDER).map(_.split("\t")).filter(_.length == 13).map(_.toList.mkString("\t")).coalesce(1).saveAsTextFile("hdfs://appcluster/elem/input/order2")
+    Contexts.getSparkContext.textFile(Constants.InputPath.ORDER).map(_.split("\t")).filter(_.length == 13).map(_.toList.mkString("\t")).coalesce(1).saveAsTextFile("hdfs://appcluster/elem/input/order2")
   }
 
   //remember delete!!
-  def testTempConvert = {
-    val rdd = BaseContext.getSparkContext.textFile("hdfs://appcluster/elem/input/order").map(_.split("\t")).cache
+  def testTempConvert() = {
+    val rdd = Contexts.getSparkContext.textFile("hdfs://appcluster/elem/input/order").map(_.split("\t"))
     rdd.map(_.length).distinct().foreach(println)
-    rdd.map(a => (a(2), a(3))).distinct.foreach(println)
+    rdd.map(a => (a(2), a(3))).distinct().foreach(println)
   }
 
 }
