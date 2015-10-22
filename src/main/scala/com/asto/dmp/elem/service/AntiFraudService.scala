@@ -4,10 +4,30 @@ import com.asto.dmp.elem.base._
 import com.asto.dmp.elem.dao.AntiFraudDao
 import com.asto.dmp.elem.util.{Utils, DateUtils, BizUtils, FileUtils}
 
+/**
+ * 反欺诈规则
+ *
+ *运用该规则处理	的订单数据，判定每一笔订单是否为刷单。
+ *该规则由5个指标来判定，5个指标中任一刷单判定为真，则视该订单为刷单。
+ *
+ * 5个判定条件：
+ * 序号	指标名称	                  指标	                                                 刷单判定值
+ * 1	订单额异常（较年订单额均值）	    FQZ1=订单额/近12个月订单额均值	                         FQZ1>2.5
+ * 2	订单额异常（环比同期均值）	    FQZ2=订单额/所在季度同期订单额均值（如第二季度第3周         FQZ2>3
+ *                                周一的订单，就和第二季度所有周一的单笔订单额均值进行比较）
+ * 3	复购率                  	    FQZ3=同一买家ID一天之内的购买次数	                        FQZ3>2
+ * 4	下单距离异常	                FQZ4=店铺地址与配送地址的距离（公式见备注）	                FQZ4<0.1KM or FQZ4>5KM
+ * 5	分时点订单额异常（环比同期均值）	FQZ5=订单额/当日订单额均值（注：不同时点，阀值不同。）	      FQZ5≥2.45  繁忙时点（10,11,12,16,17,18,19） FQZ5≥2.55 其他闲暇时点
+ *
+ * 输出结果1：
+ * 订单ID, 订单日期, 餐厅ID ,餐厅名称 ,下单客户ID	,下单时间	,订单额 ,刷单指标值1	,刷单指标值2,	刷单指标值3,	刷单指标值4,	刷单指标值5,	是否刷单
+ *
+ * 输出结果2：
+ * 餐厅ID,餐厅名称,近6个月刷单金额,近6个月总营业额,刷单率
+ */
 class AntiFraudService extends DataSource with Serializable {
 
   def run(): Unit = {
-
     try {
       logInfo(Utils.wrapLog("开始运行反欺诈模型"))
       //输出1：订单ID, 订单日期, 餐厅ID ,餐厅名称 ,下单客户ID	,下单时间	,订单额 ,刷单指标值1	,刷单指标值2,	刷单指标值3,	刷单指标值4,	刷单指标值5,	是否刷单
@@ -29,7 +49,7 @@ class AntiFraudService extends DataSource with Serializable {
       fakedInfo.persist()
 
       FileUtils.deleteHdfsFiles(Constants.OutputPath.ANTI_FRAUD_FAKED_INFO_TEXT)
-      fakedInfo.map(_.productIterator.mkString(",")).coalesce(1).saveAsTextFile(Constants.OutputPath.ANTI_FRAUD_FAKED_INFO_TEXT)
+      fakedInfo.map(_.productIterator.mkString(Constants.OutputPath.SEPARATOR)).coalesce(1).saveAsTextFile(Constants.OutputPath.ANTI_FRAUD_FAKED_INFO_TEXT)
 
       //输出2：餐厅ID,餐厅名称,近6个月刷单金额,近6个月总营业额,刷单率
       val lastSixMonthsList = BizUtils.getLastMonths(6, "yyyy/M")
@@ -37,19 +57,18 @@ class AntiFraudService extends DataSource with Serializable {
         .filter(t => lastSixMonthsList.contains(t._1.toString)).persist() //(2015/6,15453,风云便当,15.0,false)
       //近6个月总营业额
       val lastSixMonthsTotalSales = result2NeedsData.map(t => (t._2, t._4))
-        .groupByKey().map(t => (t._1, t._2.sum)) //(15453,390662.0)
+          .groupByKey().map(t => (t._1, t._2.sum)) //(15453,390662.0)
       //近6个月刷单金额
       val lastSixMonthsFakedSales = result2NeedsData.filter(_._5.toString.toBoolean)
-        .map(t => (t._2, t._4)).groupByKey().map(t => (t._1, t._2.sum))
+          .map(t => (t._2, t._4)).groupByKey().map(t => (t._1, t._2.sum))
 
       val lastSixMonthsFakedRate = BizUtils.shopIDAndName(lastSixMonthsList).leftOuterJoin(lastSixMonthsFakedSales) //(15453,(风云便当,Some(53255.5)))
         .leftOuterJoin(lastSixMonthsTotalSales) //(15453,((风云便当,Some(53255.5)),Some(390662.0)))
-        .filter(t => t._2._2.get.toString.toDouble > 0)
+        .filter(t => t._2._2.isDefined && t._2._2.get.toString.toDouble > 0)
         .map(t => (t._1, t._2._1._1, t._2._1._2.getOrElse(0).toString, t._2._2.get.toString, t._2._1._2.getOrElse(0D).toString.toDouble / t._2._2.get.toString.toDouble)).persist()
       FileUtils.deleteHdfsFiles(Constants.OutputPath.ANTI_FRAUD_FAKED_RATE_TEXT)
-      lastSixMonthsFakedRate.map(_.productIterator.mkString(",")).coalesce(1).saveAsTextFile(Constants.OutputPath.ANTI_FRAUD_FAKED_RATE_TEXT)
+      lastSixMonthsFakedRate.map(_.productIterator.mkString(Constants.OutputPath.SEPARATOR)).coalesce(1).saveAsTextFile(Constants.OutputPath.ANTI_FRAUD_FAKED_RATE_TEXT)
       fakedInfo.unpersist()
-
     } catch {
       case t: Throwable =>
         // MailAgent(t, Constants.Mail.CREDIT_SUBJECT, Mail.getPropByKey("mail_to_credit")).sendMessage()

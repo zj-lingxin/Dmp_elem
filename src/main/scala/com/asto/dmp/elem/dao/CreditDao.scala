@@ -95,10 +95,10 @@ object CreditDao extends scala.Serializable  {
    */
   def getBetaInfo = {
     //准入规则中的输出
-    val dayAverageSales = BizDao.getAccessInfoProps(SQL().setSelect("shop_id,day_average_sales")).map(a => (a(0).toString,a(1).toString.toDouble)) //(shop_id,day_average_sales)
-    getSalesRateWeighting.leftOuterJoin(dayAverageSales) //(15453,(0.2800160158853955,Some(1000.0)))
-      .map(t => (t._1, t._2._1.toDouble, t._2._2.getOrElse("0").toString.toDouble))
-      .map(t => (t._1, (t._2, t._3, getBeta(t._2, t._3)))) //(15453,(0.2800160158853955,2000.0,0.2))
+    val dayAverageSales = BizDao.getAccessInfoProps(SQL().setSelect("shop_id,day_average_sales,is_access")).map(a => (a(0).toString,(a(1).toString.toDouble,a(2)))) //(shop_id,day_average_sales)
+    getSalesRateWeighting.leftOuterJoin(dayAverageSales) //(15453,(0.2800160158853955,Some((1000.0,true))))
+      .map(t => (t._1, t._2._1.toDouble, t._2._2.getOrElse((0,false))._1.toString.toDouble, t._2._2.getOrElse((0,false))._2))
+      .map(t => (t._1, (t._2, t._3, getBeta(t._2, t._3),t._4))) //(15453,(0.2800160158853955,2000.0,0.18,true))
   }
 
   private def getBeta(salesRateWeighting: Double, dayAverageSales: Double): Double = {

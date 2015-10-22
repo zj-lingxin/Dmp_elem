@@ -1,8 +1,7 @@
 package com.asto.dmp.elem.util
 
 import java.util.Calendar
-
-import com.asto.dmp.elem.base.{SQL, Contexts, Constants}
+import com.asto.dmp.elem.base.SQL
 import com.asto.dmp.elem.dao.BizDao
 import org.apache.spark.rdd.RDD
 import scala.collection._
@@ -100,18 +99,6 @@ object BizUtils {
     list
   }
 
-  //remember delete!!
-  def tempConvertData(): Unit = {
-    Contexts.getSparkContext.textFile(Constants.InputPath.ORDER).map(_.split("\t")).filter(_.length == 13).map(_.toList.mkString("\t")).coalesce(1).saveAsTextFile("hdfs://appcluster/elem/input/order2")
-  }
-
-  //remember delete!!
-  def testTempConvert() = {
-    val rdd = Contexts.getSparkContext.textFile("hdfs://appcluster/elem/input/order").map(_.split("\t"))
-    rdd.map(_.length).distinct().foreach(println)
-    rdd.map(a => (a(2), a(3))).distinct().foreach(println)
-  }
-
   def lastMonthsDayAverageSales(monthNums: Int) = {
     val lastMothsList = BizUtils.getLastMonths(monthNums, "yyyy/M")
     val monthAndDaysNumMap = BizUtils.getMonthAndDaysNumMap(lastMothsList, "yyyy/M")
@@ -141,5 +128,4 @@ object BizUtils {
       .map(t => (t._1._1, (t._2.sum, t._1._2))).groupByKey()
       .map(t => (t._1, t._2.max)).map(t => (t._1, t._2._2))
   }
-
 }

@@ -9,15 +9,16 @@ import org.apache.spark.Logging
  */
 object Main extends Logging {
   def main(args: Array[String]) {
+    val startTime = System.currentTimeMillis()
     if (Option(args).isEmpty || args.length == 0) {
       logError(Utils.wrapLog("请传入模型编号：1~5"))
       return
     }
-
     args(0) match {
       case "1" =>
         //反欺诈模型
         new AntiFraudService().run()
+        //BizDao.getOrderProps().filter(a => a(0).toString.contains("2015/10") )map(_.iterator.mkString(","))foreach(println)
       case "2" =>
         //准入模型
         new AccessService().run()
@@ -39,5 +40,8 @@ object Main extends Logging {
     }
 
     Contexts.stopSparkContext()
+    val endTime = System.currentTimeMillis()
+    logInfo(s"程序共运行${(startTime - endTime) / 1000}秒")
+
   }
 }

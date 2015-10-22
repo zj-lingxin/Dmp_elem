@@ -26,7 +26,7 @@ object Constants {
 
   /** 输出文件路径 **/
   object OutputPath {
-    val SEPARATOR = ","
+    val SEPARATOR = "\t"
     private val TODAY = DateUtils.getStrDate("yyyyMM/dd")
     private val DIR = s"${App.HADOOP_DIR}/output"
 

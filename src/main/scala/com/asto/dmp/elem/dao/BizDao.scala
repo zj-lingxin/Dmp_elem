@@ -11,4 +11,5 @@ object BizDao extends Dao {
   def getFakedRateProps(sql: SQL = new SQL()) = getProps(Constants.OutputPath.ANTI_FRAUD_FAKED_RATE_TEXT, Constants.Schema.FAKED_RATE, "fakedRate", sql, Constants.OutputPath.SEPARATOR)
 
   def getAccessInfoProps(sql: SQL = new SQL()) = getProps(Constants.OutputPath.ACCESS_TEXT, Constants.Schema.ACCESS_INFO, "accessInfo", sql, Constants.OutputPath.SEPARATOR)
+
 }
