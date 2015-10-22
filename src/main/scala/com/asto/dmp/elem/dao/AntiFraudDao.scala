@@ -22,7 +22,7 @@ object AntiFraudDao extends Logging {
       .map(t => (t._1, t._2.sum / t._2.toList.length)) //求出近12个月定单额均值：(15453,16.351623407983883)
     last12MonthsOrderSales.map(t => (t._2, (t._4, t._3)))
       .leftOuterJoin(last12MonthsAvgSales) //(15453,((12974166848017753,15.0),Some(16.351623407983883)))
-      .map(t => (t._1, t._2._1._1, t._2._1._2 / t._2._2.get, if(t._2._1._2 / t._2._2.get > 2.5) true else false)) //(shop_id,订单号,FQZ1)(15453,12674266136499453,1.0090741199398996)
+      .map(t => (t._1, t._2._1._1, t._2._1._2 / t._2._2.get, (t._2._1._2 / t._2._2.get) > 2.5)) //(shop_id,订单号,FQZ1)(15453,12674266136499453,1.0090741199398996)
   }
 
   /**
@@ -33,15 +33,15 @@ object AntiFraudDao extends Logging {
   def getFQZ2Info = {
     val dataRDD = BizDao.getOrderProps(SQL().setSelect("order_id,order_date,shop_id,order_money"))
       .filter(a => last12MothsList.contains(DateUtils.cutYearMonth(a(1).toString)))//过滤出近12份个月的数据
-      .map(a => (a(0).toString, a(1).toString, a(2).toString, a(3).toString.toDouble, AntiFraudDao.getWeekDay(a(1).toString), DateUtils.getQuarterStartTime(a(1).toString, "yyyy/M/d"))).cache()
+      .map(a => (a(0).toString, a(1).toString, a(2).toString, a(3).toString.toDouble, getWeekDay(a(1).toString), DateUtils.getQuarterStartTime(a(1).toString, "yyyy/M/d"))).cache()
 
     val avgSalesRDD = dataRDD.groupBy(t => (t._6, t._3, t._5))//按季度、shop_id、星期几排序 ((2015-07-01,1,7),CompactBuffer((11211,2015-07-11,1,23.0,7,2015-07-01), (11215,2015-09-12,1,22.3,7,2015-07-01)))
-      .map(t => (t._1, AntiFraudDao.count(t._2.toIterator)))
+      .map(t => (t._1, count(t._2.toIterator)))
 
     val tempRDD = dataRDD.map(t => ((t._6, t._3, t._5), t))
     avgSalesRDD.leftOuterJoin(tempRDD)
       .map(t => (t._2._2.get, t._2._1))//((订单编号 12268923781587153, 订单日期：2015/4/16, shop_id: 15453, 订单额：15.0,星期几(注意星期日是1，星期一是2，以此类推)5,季度：2015/4/1),所在季度同期订单额均值：17.28598174584601)
-      .map(t => (t._1._3, t._1._1, t._1._4 / t._2, if(t._1._4 / t._2 > 3) true else false))
+      .map(t => (t._1._3, t._1._1, t._1._4 / t._2, (t._1._4 / t._2) > 3))
   }
 
   /**
@@ -54,7 +54,7 @@ object AntiFraudDao extends Logging {
       .map(a => ((a(1).toString, a(2).toString, a(3).toString), a(0).toString))
     val repeatBuyKey = dataRDD.groupByKey().map(t => (t._1, t._2.size))
     dataRDD.leftOuterJoin(repeatBuyKey)//((2014/11/14,15453,5589346),(12159697518643953,Some(2)))
-      .map(t => (t._2._1, t._1._1, t._1._2, t._1._3, t._2._2.getOrElse(1),if(t._2._2.getOrElse(1) > 2) true else false))
+      .map(t => (t._2._1, t._1._1, t._1._2, t._1._3, t._2._2.getOrElse(1),(t._2._2.getOrElse(1)) > 2))
 
   }
 
@@ -77,7 +77,7 @@ object AntiFraudDao extends Logging {
     }
     unFilterRDD.filter(t => t._2._2.isDefined)
       .map(t => (t._1, t._2._1._1, getDistance(t._2._1._4.toDouble, t._2._1._5.toDouble, t._2._2.get._1.toDouble, t._2._2.get._2.toDouble)))
-      .map(t => (t._1, t._2, t._3, if (t._3.toDouble < 0.1 || t._3.toDouble > 5) true else false))
+      .map(t => (t._1, t._2, t._3, t._3.toDouble < 0.1 || t._3.toDouble > 5))
   }
 
   /**

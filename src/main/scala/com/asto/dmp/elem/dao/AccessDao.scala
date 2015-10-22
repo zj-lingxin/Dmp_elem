@@ -13,7 +13,7 @@ import com.asto.dmp.elem.util.{BizUtils, DateUtils}
  * "日净营业额"指该日营业额与该日刷单金额之差
  */
 object AccessDao {
-  private val lastSixMonthsDayAverageSales = lastMonthsDayAverageSales(6)
+  private val lastSixMonthsDayAverageSales = BizUtils.lastMonthsDayAverageSales(6)
 
   /**
    * 平台连续经营时间(ShopDuration): 在饿了么平台连续有交易额的自然月月份数
@@ -42,7 +42,7 @@ object AccessDao {
    * 返回字段:(店铺ID,基于3个月的营业额增长率)
    */
   def getSaleRateInThreeMonths = {
-    lastMonthsDayAverageSales(3).leftOuterJoin(lastSixMonthsDayAverageSales) // (15453,(238.93896569380442,Some(1844.7884792626726)))
+    BizUtils.lastMonthsDayAverageSales(3).leftOuterJoin(lastSixMonthsDayAverageSales) // (15453,(238.93896569380442,Some(1844.7884792626726)))
       .filter(t => t._2._2.isDefined && t._2._2.get > 0) //过滤出符合条件的分母
       .map(t => (t._1, t._2._1 / t._2._2.get))
   }
@@ -53,7 +53,7 @@ object AccessDao {
    * 返回字段:(店铺ID,基于1个月的营业额增长率)
    */
   def getSaleRateInOneMonths = {
-    lastMonthsDayAverageSales(1).leftOuterJoin(lastSixMonthsDayAverageSales)
+    BizUtils.lastMonthsDayAverageSales(1).leftOuterJoin(lastSixMonthsDayAverageSales)
       .filter(t => t._2._2.isDefined && t._2._2.get > 0) //过滤出符合条件的分母
       .map(t => (t._1, t._2._1 / t._2._2.get))
   }
@@ -94,16 +94,4 @@ object AccessDao {
     duration
   }
 
-  private def lastMonthsDayAverageSales(monthNums: Int) = {
-    val lastMothsList = BizUtils.getLastMonths(monthNums, "yyyy/M")
-    val monthAndDaysNumMap = BizUtils.getMonthAndDaysNumMap(lastMothsList, "yyyy/M")
-    BizDao.getFakedInfoProps(SQL().setSelect("order_date,shop_id,order_money,is_faked").setWhere("is_faked = 'false'")) //取出的数据是净营业额(即不包含刷单的营业额)
-      .map(a => (DateUtils.cutYearMonth(a(0).toString), a(1), a(2))) //(2015/5,15453,18.0)
-      .filter(t => lastMothsList.contains(t._1)) //过滤出近6个月的数据
-      .map(t => ((t._2, t._1), t._3.toString.toDouble)) //((15453,2015/7),15.0)
-      .groupByKey() //((15453,2015/5),CompactBuffer(22.0, 15.0, 15.0, 31.0, ...))
-      .map(t => (t._1._1, t._2.sum / monthAndDaysNumMap(t._1._2))) //得到了每个月的日均净营业额(15453,2360.4)
-      .groupByKey() //(15453,CompactBuffer(673.0645161290323, 4914.435483870968, 1124.61904761904762, 1219.133333333333333, 4367.833333333333, 1069.6451612903227))
-      .map(t => (t._1.toString, t._2.sum / monthNums)) //得到了日均净营业额：(店铺ID:15453,日均净营业额:1844.7884792626726)
-  }
 }

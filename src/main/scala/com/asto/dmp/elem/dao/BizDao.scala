@@ -2,7 +2,7 @@ package com.asto.dmp.elem.dao
 
 import com.asto.dmp.elem.base._
 
-object BizDao extends DAO {
+object BizDao extends Dao {
 
   def getOrderProps(sql: SQL = new SQL()) = getProps(Constants.InputPath.ORDER, Constants.Schema.ORDER, "orderTable", sql)
 

@@ -4,7 +4,7 @@ import com.asto.dmp.elem.util.Utils
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 
-trait DAO extends DataSource {
+trait Dao extends DataSource {
   protected def getProps(inputFilePath: String, schema: String, tempTableName: String, sqlObj: SQL, separator: String = Constants.InputPath.SEPARATOR) = {
     registerTempTableIfNotExist(inputFilePath, schema, tempTableName, separator)
 

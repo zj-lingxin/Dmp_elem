@@ -42,13 +42,7 @@ class AntiFraudService extends DataSource with Serializable {
       val lastSixMonthsFakedSales = result2NeedsData.filter(_._5.toString.toBoolean)
         .map(t => (t._2, t._4)).groupByKey().map(t => (t._1, t._2.sum))
 
-      //获取店铺ID和店铺名称。之所以做的这么复杂，是因为考虑到有可能相同的店铺ID，会有不同的店铺名称。
-      //如 店铺ID为15453,店铺名称为“风云便当”。但有时候，也肯能出现店铺名称是“风云便当【满25减9】”的数据。
-      //所以以下会取最常用的店铺名称与店铺ID对应。即“风云便当【满25减9】”可能变成“风云便当”，其他不变。
-      val shopIDAndName = result2NeedsData.map(t => ((t._2, t._3), 1)).groupByKey()
-        .map(t => (t._1._1, (t._2.sum, t._1._2))).groupByKey()
-        .map(t => (t._1, t._2.max)).map(t => (t._1, t._2._2)) //(餐厅ID,餐厅名称)
-      val lastSixMonthsFakedRate = shopIDAndName.leftOuterJoin(lastSixMonthsFakedSales) //(15453,(风云便当,Some(53255.5)))
+      val lastSixMonthsFakedRate = BizUtils.shopIDAndName(lastSixMonthsList).leftOuterJoin(lastSixMonthsFakedSales) //(15453,(风云便当,Some(53255.5)))
         .leftOuterJoin(lastSixMonthsTotalSales) //(15453,((风云便当,Some(53255.5)),Some(390662.0)))
         .filter(t => t._2._2.get.toString.toDouble > 0)
         .map(t => (t._1, t._2._1._1, t._2._1._2.getOrElse(0).toString, t._2._2.get.toString, t._2._1._2.getOrElse(0D).toString.toDouble / t._2._2.get.toString.toDouble)).persist()
