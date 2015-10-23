@@ -1,12 +1,12 @@
 package com.asto.dmp.elem.dao
 
 import java.util.Calendar
-import com.asto.dmp.elem.base.{Contexts, SQL}
+import com.asto.dmp.elem.base.{Constants, Contexts, SQL}
 import com.asto.dmp.elem.util.{Utils, DateUtils, BizUtils}
 import org.apache.spark.Logging
 
 object AntiFraudDao extends Logging {
-  val last12MothsList = BizUtils.getLastMonths(12, "yyyy/M")
+  val last12MothsList = BizUtils.getLastMonths(12, Constants.App.YEAR_MONTH_FORMAT)
 
   /**
    * FQZ1=订单额/近12个月订单额均值
@@ -33,7 +33,7 @@ object AntiFraudDao extends Logging {
   def getFQZ2Info = {
     val dataRDD = BizDao.getOrderProps(SQL().setSelect("order_id,order_date,shop_id,order_money"))
       .filter(a => last12MothsList.contains(DateUtils.cutYearMonth(a(1).toString))) //过滤出近12份个月的数据
-      .map(a => (a(0).toString, a(1).toString, a(2).toString, a(3).toString.toDouble, getWeekDay(a(1).toString), DateUtils.getQuarterStartTime(a(1).toString, "yyyy/M/d"))).cache()
+      .map(a => (a(0).toString, a(1).toString, a(2).toString, a(3).toString.toDouble, getWeekDay(a(1).toString), DateUtils.getQuarterStartTime(a(1).toString, Constants.App.YEAR_MONTH_DAY_FORMAT))).cache()
 
     val avgSalesRDD = dataRDD.groupBy(t => (t._6, t._3, t._5)) //按季度、shop_id、星期几排序 ((2015-07-01,1,7),CompactBuffer((11211,2015-07-11,1,23.0,7,2015-07-01), (11215,2015-09-12,1,22.3,7,2015-07-01)))
       .map(t => (t._1, count(t._2.toIterator)))
@@ -73,7 +73,7 @@ object AntiFraudDao extends Logging {
       ("43542", "120.206797", "30.256218"), //945就是我外卖
       ("7433", "120.351948", "30.324667") //米宝宝
     )).map(t => (t._1.toString, (t._2, t._3)))
-    BizUtils.getLastMonths(12, "yyyy/M")
+    BizUtils.getLastMonths(12, Constants.App.YEAR_MONTH_FORMAT)
     val unFilterRDD = BizDao.getOrderProps(SQL().setSelect("order_id,order_date,shop_id,custom_id,lng_lat"))
       .filter(a => last12MothsList.contains(DateUtils.cutYearMonth(a(1).toString))) //过滤出近12份个月的数据
       .map(a => {val (lng, lat) = getLngAndLat(a(4).toString); (a(2).toString, (a(0).toString, a(1).toString, a(3).toString, lng, lat))})
@@ -156,7 +156,7 @@ object AntiFraudDao extends Logging {
   }
 
   private def getWeekDay(strDate: String): Int = {
-    DateUtils.strToCalendar(strDate, "yyyy/M/d").get(Calendar.DAY_OF_WEEK)
+    DateUtils.strToCalendar(strDate, Constants.App.YEAR_MONTH_DAY_FORMAT).get(Calendar.DAY_OF_WEEK)
   }
 
   /**

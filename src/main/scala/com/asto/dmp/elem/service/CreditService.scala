@@ -2,6 +2,7 @@ package com.asto.dmp.elem.service
 
 import com.asto.dmp.elem.base._
 import com.asto.dmp.elem.dao.CreditDao
+import com.asto.dmp.elem.util.mail.MailAgent
 import com.asto.dmp.elem.util.{Utils, FileUtils}
 
 /**
@@ -45,13 +46,11 @@ class CreditService extends DataSource with scala.Serializable {
         .map(t => (t._1, t._2._1._2, t._2._2.get._1, t._2._2.get._2, t._2._2.get._3, t._2._1._1, t._2._1._3, t._2._2.get._4)) //(餐厅id,餐厅名称,营业额加权环比增长率,日均净营业额,β,近12个月日均营业额均值,刷单率)
         .map(t => (t._1, t._2, t._3, t._4, t._5, t._6, t._7, Math.min(t._6 * (1 - t._7) * 30 * t._5,  CreditDao.loanCeiling), t._8))
 
-      FileUtils.deleteHdfsFiles(Constants.OutputPath.CREDIT_TEXT)
       //输出文件的字段：餐厅id, 餐厅名称, 营业额加权环比增长率, 日均净营业额, 贷款倍率, 近12个月日营业额均值, 刷单率, 授信额度, 是否准入
-      lineOfCredit.map(_.productIterator.mkString(Constants.OutputPath.SEPARATOR)).coalesce(1).saveAsTextFile(Constants.OutputPath.CREDIT_TEXT)
-
+      FileUtils.saveAsTextFile(lineOfCredit,Constants.OutputPath.CREDIT_TEXT)
     } catch {
       case t: Throwable =>
-        // MailAgent(t, Constants.Mail.CREDIT_SUBJECT, Mail.getPropByKey("mail_to_credit")).sendMessage()
+        MailAgent(t, Constants.Mail.CREDIT_SUBJECT).sendMessage()
         logError(Constants.Mail.CREDIT_SUBJECT, t)
     } finally {
       logInfo(Utils.wrapLog("授信模型运行结束"))

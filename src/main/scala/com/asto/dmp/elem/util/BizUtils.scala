@@ -1,7 +1,7 @@
 package com.asto.dmp.elem.util
 
 import java.util.Calendar
-import com.asto.dmp.elem.base.SQL
+import com.asto.dmp.elem.base.{Constants, SQL}
 import com.asto.dmp.elem.dao.BizDao
 import org.apache.spark.rdd.RDD
 import scala.collection._
@@ -63,7 +63,7 @@ object BizUtils {
     }
   }
 
-  def getDaysNumInMonth(strDate: String, formatText: String = "yyyy/M"): Int = {
+  def getDaysNumInMonth(strDate: String, formatText: String = Constants.App.YEAR_MONTH_FORMAT): Int = {
     val paramYearAndMonth = DateUtils.cutYearMonthDay(strDate)
     val currYearAndMonth = DateUtils.getStrDate(formatText)
     if (paramYearAndMonth == currYearAndMonth) curDateInBiz
@@ -100,8 +100,8 @@ object BizUtils {
   }
 
   def lastMonthsDayAverageSales(monthNums: Int) = {
-    val lastMothsList = BizUtils.getLastMonths(monthNums, "yyyy/M")
-    val monthAndDaysNumMap = BizUtils.getMonthAndDaysNumMap(lastMothsList, "yyyy/M")
+    val lastMothsList = BizUtils.getLastMonths(monthNums, Constants.App.YEAR_MONTH_FORMAT)
+    val monthAndDaysNumMap = BizUtils.getMonthAndDaysNumMap(lastMothsList, Constants.App.YEAR_MONTH_FORMAT)
     BizDao.getFakedInfoProps(SQL().setSelect("order_date,shop_id,order_money,is_faked").setWhere("is_faked = 'false'")) //取出的数据是净营业额(即不包含刷单的营业额)
       .map(a => (DateUtils.cutYearMonth(a(0).toString), a(1), a(2))) //(2015/5,15453,18.0)
       .filter(t => lastMothsList.contains(t._1)) //过滤出近6个月的数据
@@ -120,7 +120,7 @@ object BizUtils {
    * 返回字段：(餐厅ID,餐厅名称)
    */
   def shopIDAndName(monthNum: Int): RDD[(String,String)] = {
-    shopIDAndName(getLastMonths(monthNum, "yyyy/M"))
+    shopIDAndName(getLastMonths(monthNum, Constants.App.YEAR_MONTH_FORMAT))
   }
 
   def shopIDAndName(lastMonths: mutable.ListBuffer[String]): RDD[(String,String)] = {

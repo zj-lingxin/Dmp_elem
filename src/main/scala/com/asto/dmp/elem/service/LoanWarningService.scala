@@ -2,6 +2,7 @@ package com.asto.dmp.elem.service
 
 import com.asto.dmp.elem.base.{Constants, DataSource}
 import com.asto.dmp.elem.dao.LoanWarningDao
+import com.asto.dmp.elem.util.mail.MailAgent
 import com.asto.dmp.elem.util.{FileUtils, BizUtils, Utils}
 
 /**
@@ -26,15 +27,14 @@ class LoanWarningService extends DataSource with scala.Serializable {
       val saleRateInOneMonths = LoanWarningDao.getSaleRateInOneMonths
       val saleRateInThreeMonths = LoanWarningDao.getSaleRateInThreeMonths
 
-      FileUtils.deleteHdfsFiles(Constants.OutputPath.LOAN_WARNING_TEXT)
       //输出文件的字段：餐厅ID, 餐厅名称,预警指标1,	预警指标2	,是否预警
-      saleRateInThreeMonths.leftOuterJoin(saleRateInOneMonths)
-        .leftOuterJoin(BizUtils.shopIDAndName(6))//(17644,((0.2516462000131865,Some(0.013666223088784037)),Some(美食美客)))
-        .map(t => (t._1, t._2._2.getOrElse(0), t._2._1._1,t._2._1._2.getOrElse(0), t._2._1._1 < 0.7 || t._2._1._2.get < 0.7 ))
-        .map(_.productIterator.mkString(Constants.OutputPath.SEPARATOR)).coalesce(1).saveAsTextFile(Constants.OutputPath.LOAN_WARNING_TEXT)
+      val resultRDD = saleRateInThreeMonths.leftOuterJoin(saleRateInOneMonths)
+        .leftOuterJoin(BizUtils.shopIDAndName(6)) //(17644,((0.2516462000131865,Some(0.013666223088784037)),Some(美食美客)))
+        .map(t => (t._1, t._2._2.getOrElse(0), t._2._1._1, t._2._1._2.getOrElse(0), t._2._1._1 < 0.7 || t._2._1._2.get < 0.7))
+      FileUtils.saveAsTextFile(resultRDD, Constants.OutputPath.LOAN_WARNING_TEXT)
     } catch {
       case t: Throwable =>
-        // MailAgent(t, Constants.Mail.CREDIT_SUBJECT, Mail.getPropByKey("mail_to_credit")).sendMessage()
+        MailAgent(t, Constants.Mail.LOAN_WARNING_SUBJECT).sendMessage()
         logError(Constants.Mail.LOAN_WARNING_SUBJECT, t)
     } finally {
       logInfo(Utils.wrapLog("贷后模型运行结束"))

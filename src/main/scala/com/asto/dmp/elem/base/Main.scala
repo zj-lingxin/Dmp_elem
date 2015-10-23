@@ -18,7 +18,6 @@ object Main extends Logging {
       case "1" =>
         //反欺诈模型
         new AntiFraudService().run()
-        //BizDao.getOrderProps().filter(a => a(0).toString.contains("2015/10") )map(_.iterator.mkString(","))foreach(println)
       case "2" =>
         //准入模型
         new AccessService().run()

@@ -2,6 +2,7 @@ package com.asto.dmp.elem.service
 
 import com.asto.dmp.elem.base.{DataSource, Constants}
 import com.asto.dmp.elem.dao.AccessDao
+import com.asto.dmp.elem.util.mail.{Mail, MailAgent}
 import com.asto.dmp.elem.util.{Utils, FileUtils}
 
 /**
@@ -39,19 +40,17 @@ class AccessService extends DataSource {
       val saleRateInOneMonths = AccessDao.getSaleRateInOneMonths
       val saleRateInThreeMonths = AccessDao.getSaleRateInThreeMonths
 
-      FileUtils.deleteHdfsFiles(Constants.OutputPath.ACCESS_TEXT)
       //输出文件的字段：餐厅ID,餐厅名称,平台连续经营时间,日均净营业额,基于3个月的营业额增长率,基于1个月的营业额增长率,刷单率,是否准入
-      fakedRate.leftOuterJoin(shopDuration)
+      val resultRDD = fakedRate.leftOuterJoin(shopDuration)
         .leftOuterJoin(dayAverageSales)
         .leftOuterJoin(saleRateInOneMonths)
         .leftOuterJoin(saleRateInThreeMonths) //(17644,(((((美食美客,0.0850489185650941),Some(14)),Some(1372.866858678956)),Some(0.013666223088784037)),Some(0.2516462000131865)))
         .map(t => (t._1, t._2._1._1._1._1._1, t._2._1._1._1._2.getOrElse(0), t._2._1._1._2.getOrElse(0), t._2._2.getOrElse(0), t._2._1._2.getOrElse(0), t._2._1._1._1._1._2))
         .map(t => (t._1, t._2, t._3, t._4, t._5, t._6, t._7, t._3 >= 6 && t._4.toString.toDouble >= 1000 && t._5.toString.toDouble >= 1 && t._6.toString.toDouble >= 1 && t._7 <= 0.2))
-        .map(_.productIterator.mkString(Constants.OutputPath.SEPARATOR)).coalesce(1).saveAsTextFile(Constants.OutputPath.ACCESS_TEXT)
-
+      FileUtils.saveAsTextFile(resultRDD, Constants.OutputPath.ACCESS_TEXT)
     } catch {
       case t: Throwable =>
-        // MailAgent(t, Constants.Mail.CREDIT_SUBJECT, Mail.getPropByKey("mail_to_credit")).sendMessage()
+        MailAgent(t, Constants.Mail.ACCESS_SUBJECT).sendMessage()
         logError(Constants.Mail.ACCESS_SUBJECT, t)
     } finally {
       logInfo(Utils.wrapLog("准入模型运行结束"))

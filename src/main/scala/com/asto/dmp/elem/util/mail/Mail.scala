@@ -5,13 +5,13 @@ import java.util.Properties
 import com.asto.dmp.elem.base.Constants
 
 object Mail {
-  private val prop = new Properties()
+  val prop = new Properties()
   /*
   在spark-submit中加入--driver-java-options -DPropPath=/home/hadoop/prop.properties的参数后，
   使用System.getProperty("PropPath")就能获取路径：/home/hadoop/prop.properties
    */
   private val propPath = System.getProperty("PropPath")
-  private val hasPropPath = if (propPath == null) false else true
+  private val hasPropPath = if (Option(propPath).isDefined) true else false
 
   //如果spark-submit中指定了prop.properties文件的路径，那么使用prop.properties中的属性，否则使用该类中定义的属性
   if (hasPropPath) {
@@ -24,11 +24,7 @@ object Mail {
     prop.put("mail_subject", Constants.Mail.SUBJECT)
     prop.put("mail_cc", Constants.Mail.CC)
     prop.put("mail_bcc", Constants.Mail.BCC)
-    prop.put("mail_to_fraud", Constants.Mail.TO_FRAUD)
-    prop.put("mail_to_score", Constants.Mail.TO_SCORE)
-    prop.put("mail_to_access", Constants.Mail.TO_ACCESS)
-    prop.put("mail_to_credit", Constants.Mail.TO_CREDIT)
-    prop.put("mail_to_loan_warning", Constants.Mail.TO_LOAN_WARNING)
+    prop.put("mail_enable", Constants.Mail.ENABLE)
   }
 
   def getPropByKey(propertyKey: String): String = {

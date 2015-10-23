@@ -41,8 +41,8 @@ object Contexts extends Logging with scala.Serializable {
 
     (masterInCodes, masterInSparkConf) match {
       case (None, None) =>
-        logWarning(Utils.wrapLog(s"集群和程序代码中都没有设置Master参数,在${getClass.getName}的initSparkContext中对它设置成local"))
-        conf.setMaster("local")
+        logWarning(Utils.wrapLog(s"集群和程序代码中都没有设置Master参数,在${getClass.getName}的initSparkContext中对它设置成local[4]"))
+        conf.setMaster("local[4]")
       case (None, Some(_)) =>
         logInfo(Utils.wrapLog("程序代码中都没有设置Master参数,但是集群中设置了Master参数，使用集群设置的Master参数"))
       case (Some(_), None) =>

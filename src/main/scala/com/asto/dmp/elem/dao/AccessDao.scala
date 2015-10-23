@@ -1,7 +1,7 @@
 package com.asto.dmp.elem.dao
 
 import java.util.Calendar
-import com.asto.dmp.elem.base.SQL
+import com.asto.dmp.elem.base.{Constants, SQL}
 import com.asto.dmp.elem.util.{BizUtils, DateUtils}
 
 /**
@@ -75,7 +75,7 @@ object AccessDao {
   }
 
   private def getDuration(list: List[String]) = {
-    val sortedList = list.map(DateUtils.strToStr(_, "yyyy/M", "yyyy/MM")).sorted.reverse
+    val sortedList = list.map(DateUtils.strToStr(_, Constants.App.YEAR_MONTH_FORMAT, "yyyy/MM")).sorted.reverse
     var yearAndMonth = BizUtils.getInitYearAndMonth("yyyy/MM")
     var duration = 0
     var end = false

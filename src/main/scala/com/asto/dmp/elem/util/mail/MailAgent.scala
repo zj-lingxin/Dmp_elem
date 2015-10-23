@@ -20,15 +20,17 @@ class MailAgent(mail: Mail) {
   val message = new MimeMessage(session)
 
   def sendMessage() = {
-    println("******************************** 邮件信息：" + mail + "********************************")
-    message.setFrom(new InternetAddress(mail.from))
-    setToCcBccRecipients()
-    message.setSentDate(new Date())
-    message.setSubject(mail.subject)
-    message.setText(mail.context,"UTF-8")
-    val transport = session.getTransport("smtp")
-    transport.connect(mail.smtpHost, mail.from, mail.password)
-    transport.sendMessage(message, message.getAllRecipients)
+    if(Mail.prop.getProperty("mail_enable") == "true") {
+      println("******************************** 邮件信息：" + mail + "********************************")
+      message.setFrom(new InternetAddress(mail.from))
+      setToCcBccRecipients()
+      message.setSentDate(new Date())
+      message.setSubject(mail.subject)
+      message.setText(mail.context,"UTF-8")
+      val transport = session.getTransport("smtp")
+      transport.connect(mail.smtpHost, mail.from, mail.password)
+      transport.sendMessage(message, message.getAllRecipients)
+    }
   }
 
   // throws AddressException, MessagingException

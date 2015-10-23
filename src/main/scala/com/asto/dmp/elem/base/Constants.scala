@@ -14,6 +14,10 @@ object Constants {
     val HADOOP_DIR = "hdfs://appcluster/elem/"
 
     val LOG_WRAPPER = "######################"
+
+    val YEAR_MONTH_DAY_FORMAT = "yyyy/M/d"
+
+    val YEAR_MONTH_FORMAT = "yyyy/M"
   }
 
   /** 输入文件路径 **/
@@ -66,11 +70,8 @@ object Constants {
     val SUBJECT = s"“${App.CHINESE_NAME}”项目出异常了！"
     val CC = ""
     val BCC = ""
-    val TO_FRAUD = "fengtt@asto-inc.com"
-    val TO_SCORE = "yewb@asto-inc.com"
-    val TO_ACCESS = "lij@asto-inc.com"
-    val TO_CREDIT = "lingx@asto-inc.com"
-    val TO_LOAN_WARNING = "liuw@asto-inc.com"
+    //ENABLE为false时，不启用邮件发送功能，为true是可以使用
+    val ENABLE = "false"
 
     //以下参数prop.properties中没有， MAIL_CREDIT_SUBJECT是授信规则模型出问题时邮件的主题
     val CREDIT_SUBJECT = s"${App.CHINESE_NAME}-授信规则结果集写入失败，请尽快查明原因！"

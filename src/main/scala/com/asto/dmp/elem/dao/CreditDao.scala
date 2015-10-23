@@ -1,7 +1,7 @@
 package com.asto.dmp.elem.dao
 
 import java.util.Calendar
-import com.asto.dmp.elem.base.{Contexts, SQL}
+import com.asto.dmp.elem.base.{Constants, Contexts, SQL}
 import com.asto.dmp.elem.util.{BizUtils, DateUtils}
 
 object CreditDao extends scala.Serializable  {
@@ -22,7 +22,7 @@ object CreditDao extends scala.Serializable  {
    * 计算近12个月日营业额均值
    */
   def getLast12MonthsAvgSales = {
-    val last12MothsList = BizUtils.getLastMonths(12,"yyyy/M")
+    val last12MothsList = BizUtils.getLastMonths(12, Constants.App.YEAR_MONTH_FORMAT)
     BizDao.getOrderProps(SQL().setSelect("order_date,shop_id,order_money"))
       .map(a => ((DateUtils.cutYearMonth(a(0).toString), a(1)), a(2).toString.toDouble))
       .filter(t => last12MothsList.contains(t._1._1)) //((2014/10,15453),13.0)
@@ -56,7 +56,7 @@ object CreditDao extends scala.Serializable  {
       .map(t => (t._1, t._2._1 - t._2._2.getOrElse(0D))) //((2015/7,15453),37468.0)
 
     //得到近6个月的月份(当前月大于等于15号，算一个月；忽略2月)
-    val fiveMonths = BizUtils.getLastMonths(6,"yyyy/M")
+    val fiveMonths = BizUtils.getLastMonths(6, Constants.App.YEAR_MONTH_FORMAT)
 
     //最近一个月不需要，去除。
     fiveMonths.remove(0, 1)
@@ -131,11 +131,11 @@ object CreditDao extends scala.Serializable  {
       0D
   }
 
-  private def getAvgSales(strDate: String, monthSales: Double) = monthSales / BizUtils.getDaysNumInMonth(strDate, "yyyy/M")
+  private def getAvgSales(strDate: String, monthSales: Double) = monthSales / BizUtils.getDaysNumInMonth(strDate, Constants.App.YEAR_MONTH_FORMAT)
 
   private def minusOneMonth(strDate: String): String = {
-    val cal = DateUtils.strToCalendar(strDate, "yyyy/M")
+    val cal = DateUtils.strToCalendar(strDate, Constants.App.YEAR_MONTH_FORMAT)
     cal.add(Calendar.MONTH, -1)
-    DateUtils.getStrDate(cal, "yyyy/M")
+    DateUtils.getStrDate(cal, Constants.App.YEAR_MONTH_FORMAT)
   }
 }
