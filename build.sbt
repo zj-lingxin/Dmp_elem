@@ -12,3 +12,5 @@ libraryDependencies += "org.apache.spark" % "spark-hive_2.10" % "1.4.0"
 
 libraryDependencies += "javax.mail" % "mail" % "1.4.4"
 
+libraryDependencies += "org.scalatest" % "scalatest_2.10" % "3.0.0-M7"
+

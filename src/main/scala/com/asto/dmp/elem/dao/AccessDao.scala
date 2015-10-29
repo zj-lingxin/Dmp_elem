@@ -23,7 +23,7 @@ object AccessDao {
    * 返回字段：(店铺ID,平台连续经营时间)
    */
   def getShopDuration = {
-    BizDao.getOrderProps(SQL().setSelect("shop_id,order_date"))
+    BizDao.getOrderProps(SQL().select("shop_id,order_date"))
       .map(a => (a(0).toString, DateUtils.cutYearMonth(a(1).toString)))
       .distinct().groupByKey().map(t => (t._1, getDuration(t._2.toList)))
   }
@@ -64,7 +64,7 @@ object AccessDao {
    * 返回字段：(店铺ID,(店铺名称,刷单率))
    */
   def getFakedSalesRate = {
-    BizDao.getFakedRateProps(SQL().setSelect("shop_id,shop_name,faked_rate"))
+    BizDao.getFakedRateProps(SQL().select("shop_id,shop_name,faked_rate"))
       .map(a => (a(0).toString, (a(1).toString, a(2).toString.toDouble))) //(15453,(风云便当,0.13))
   }
 

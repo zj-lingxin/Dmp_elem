@@ -102,7 +102,7 @@ object BizUtils {
   def lastMonthsDayAverageSales(monthNums: Int) = {
     val lastMothsList = BizUtils.getLastMonths(monthNums, Constants.App.YEAR_MONTH_FORMAT)
     val monthAndDaysNumMap = BizUtils.getMonthAndDaysNumMap(lastMothsList, Constants.App.YEAR_MONTH_FORMAT)
-    BizDao.getFakedInfoProps(SQL().setSelect("order_date,shop_id,order_money,is_faked").setWhere("is_faked = 'false'")) //取出的数据是净营业额(即不包含刷单的营业额)
+    BizDao.getFakedInfoProps(SQL().select("order_date,shop_id,order_money,is_faked").where("is_faked = 'false'")) //取出的数据是净营业额(即不包含刷单的营业额)
       .map(a => (DateUtils.cutYearMonth(a(0).toString), a(1), a(2))) //(2015/5,15453,18.0)
       .filter(t => lastMothsList.contains(t._1)) //过滤出近6个月的数据
       .map(t => ((t._2, t._1), t._3.toString.toDouble)) //((15453,2015/7),15.0)
@@ -124,7 +124,7 @@ object BizUtils {
   }
 
   def shopIDAndName(lastMonths: mutable.ListBuffer[String]): RDD[(String,String)] = {
-    BizDao.getOrderProps(SQL().setSelect("shop_id,shop_name,order_date")).filter(a => lastMonths.contains(DateUtils.cutYearMonth(a(2).toString))).map(a => ((a(0).toString, a(1).toString), 1)).groupByKey()
+    BizDao.getOrderProps(SQL().select("shop_id,shop_name,order_date")).filter(a => lastMonths.contains(DateUtils.cutYearMonth(a(2).toString))).map(a => ((a(0).toString, a(1).toString), 1)).groupByKey()
       .map(t => (t._1._1, (t._2.sum, t._1._2))).groupByKey()
       .map(t => (t._1, t._2.max)).map(t => (t._1, t._2._2))
   }

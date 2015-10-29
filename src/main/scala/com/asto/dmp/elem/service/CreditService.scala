@@ -24,27 +24,14 @@ import com.asto.dmp.elem.util.{Utils, FileUtils}
  * 输出结果：
  * 餐厅id, 餐厅名称, 营业额加权环比增长率, 日均净营业额, 贷款倍率, 近12个月日营业额均值, 刷单率, 授信额度, 是否准入
  */
-class CreditService extends DataSource with scala.Serializable {
+class CreditService extends Service {
 
   def run(): Unit = {
     try {
       logInfo(Utils.wrapLog("开始运行授信模型"))
-      //贷款倍率
-      val beta = CreditDao.getBetaInfo
-
-      //计算近12个月日营业额均值
-      val last12MonthsAvgSales = CreditDao.getLast12MonthsAvgSales
-
-      //刷单率
-      val fakedRate =  CreditDao.getFakedRate
 
       //计算授信额度：授信额度=MIN[近12个月日营业额均值*（1-刷单率）*30*β，500000]
-      val lineOfCredit = last12MonthsAvgSales.leftOuterJoin(fakedRate) //(15453,(3228.913844086022,Some((风云便当,0.1))))
-        .filter(t => t._2._2.isDefined)
-        .map(t => (t._1, (t._2._1, t._2._2.get._1, t._2._2.get._2))) //(15453,(3228.913844086022,风云便当,0.1))
-        .leftOuterJoin(beta) //(餐厅id,((近12个月日营业额均值,餐厅名称,刷单率),Some((营业额加权环比增长率,日均净营业额,贷款倍率(即β),是否准入))))
-        .map(t => (t._1, t._2._1._2, t._2._2.get._1, t._2._2.get._2, t._2._2.get._3, t._2._1._1, t._2._1._3, t._2._2.get._4)) //(餐厅id,餐厅名称,营业额加权环比增长率,日均净营业额,β,近12个月日均营业额均值,刷单率)
-        .map(t => (t._1, t._2, t._3, t._4, t._5, t._6, t._7, Math.min(t._6 * (1 - t._7) * 30 * t._5,  CreditDao.loanCeiling), t._8))
+      val lineOfCredit = CreditDao.getCreditResult
 
       //输出文件的字段：餐厅id, 餐厅名称, 营业额加权环比增长率, 日均净营业额, 贷款倍率, 近12个月日营业额均值, 刷单率, 授信额度, 是否准入
       FileUtils.saveAsTextFile(lineOfCredit,Constants.OutputPath.CREDIT_TEXT)

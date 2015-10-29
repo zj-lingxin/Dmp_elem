@@ -26,7 +26,7 @@ import com.asto.dmp.elem.util.{Utils, DateUtils, BizUtils, FileUtils}
  * 输出结果2：
  * 餐厅ID,餐厅名称,近6个月刷单金额,近6个月总营业额,刷单率
  */
-class AntiFraudService extends DataSource with Serializable {
+class AntiFraudService extends Service {
 
   def run(): Unit = {
     try {

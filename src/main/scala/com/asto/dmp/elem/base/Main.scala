@@ -8,13 +8,28 @@ import org.apache.spark.Logging
  * 注意：店铺经纬度风控还未给出 需要加入真数据~~~~~~~~~~~需要加入真数据~~~~~~~~~~需要加入真数据,重要的事说三遍！
  */
 object Main extends Logging {
+
+
   def main(args: Array[String]) {
     val startTime = System.currentTimeMillis()
+
     if (Option(args).isEmpty || args.length == 0) {
       logError(Utils.wrapLog("请传入模型编号：1~5"))
       return
     }
-    args(0) match {
+
+    runServicesByArgs(args(0))
+
+    Contexts.stopSparkContext()
+
+    val endTime = System.currentTimeMillis()
+
+    logInfo(s"程序共运行${(endTime - startTime) / 1000}秒")
+
+  }
+
+  private def runServicesByArgs(arg: String) = {
+    arg match {
       case "1" =>
         //反欺诈模型
         new AntiFraudService().run()
@@ -35,12 +50,7 @@ object Main extends Logging {
         new CreditService().run()
         new LoanWarningService().run()
       case _ =>
-        logError(s"传入参数错误!传入的是${args(0)},请传入1~5")
+        logError(s"传入参数错误!传入的是${arg},请传入1~5")
     }
-
-    Contexts.stopSparkContext()
-    val endTime = System.currentTimeMillis()
-    logInfo(s"程序共运行${(startTime - endTime) / 1000}秒")
-
   }
 }

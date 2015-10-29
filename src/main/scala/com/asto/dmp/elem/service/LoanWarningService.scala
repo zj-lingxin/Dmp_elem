@@ -20,7 +20,7 @@ import com.asto.dmp.elem.util.{FileUtils, BizUtils, Utils}
  *
  * 输出文件的字段：餐厅ID, 餐厅名称,预警指标1,	预警指标2	,是否预警
  */
-class LoanWarningService extends DataSource with scala.Serializable {
+class LoanWarningService extends Service {
   def run(): Unit = {
     try {
       logInfo(Utils.wrapLog("开始运行贷后模型"))

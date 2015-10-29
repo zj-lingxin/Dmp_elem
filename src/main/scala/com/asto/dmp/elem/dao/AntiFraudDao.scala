@@ -14,7 +14,7 @@ object AntiFraudDao extends Logging {
    * 刷单判定值: FQZ1>2.5
    */
   def getFQZ1Info = {
-    val last12MonthsOrderSales = BizDao.getOrderProps(SQL().setSelect("order_date,shop_id,order_money,order_id"))
+    val last12MonthsOrderSales = BizDao.getOrderProps(SQL().select("order_date,shop_id,order_money,order_id"))
       .map(a => (DateUtils.cutYearMonth(a(0).toString), a(1), a(2).toString.toDouble, a(3)))
       .filter(t => last12MothsList.contains(t._1)) // 过滤出近12个月的数据 2014/10,15453,14.0,12774264860537753)
     val last12MonthsAvgSales = last12MonthsOrderSales
@@ -31,7 +31,7 @@ object AntiFraudDao extends Logging {
    * 刷单判定值 FQZ2 > 3
    */
   def getFQZ2Info = {
-    val dataRDD = BizDao.getOrderProps(SQL().setSelect("order_id,order_date,shop_id,order_money"))
+    val dataRDD = BizDao.getOrderProps(SQL().select("order_id,order_date,shop_id,order_money"))
       .filter(a => last12MothsList.contains(DateUtils.cutYearMonth(a(1).toString))) //过滤出近12份个月的数据
       .map(a => (a(0).toString, a(1).toString, a(2).toString, a(3).toString.toDouble, getWeekDay(a(1).toString), DateUtils.getQuarterStartTime(a(1).toString, Constants.App.YEAR_MONTH_DAY_FORMAT))).cache()
 
@@ -49,7 +49,7 @@ object AntiFraudDao extends Logging {
    * 返回字段：(订单ID：12867796649165953,下单日期：2015/4/11,店铺ID：15453,客户ID：4014872,FQZ3,FQZ3是否大于2)
    */
   def getFQZ3Info = {
-    val dataRDD = BizDao.getOrderProps(SQL().setSelect("order_id,order_date,shop_id,custom_id"))
+    val dataRDD = BizDao.getOrderProps(SQL().select("order_id,order_date,shop_id,custom_id"))
       .filter(a => last12MothsList.contains(DateUtils.cutYearMonth(a(1).toString))) //过滤出近12份个月的数据
       .map(a => ((a(1).toString, a(2).toString, a(3).toString), a(0).toString))
     val repeatBuyKey = dataRDD.groupByKey().map(t => (t._1, t._2.size))
@@ -74,7 +74,7 @@ object AntiFraudDao extends Logging {
       ("7433", "120.351948", "30.324667") //米宝宝
     )).map(t => (t._1.toString, (t._2, t._3)))
     BizUtils.getLastMonths(12, Constants.App.YEAR_MONTH_FORMAT)
-    val unFilterRDD = BizDao.getOrderProps(SQL().setSelect("order_id,order_date,shop_id,custom_id,lng_lat"))
+    val unFilterRDD = BizDao.getOrderProps(SQL().select("order_id,order_date,shop_id,custom_id,lng_lat"))
       .filter(a => last12MothsList.contains(DateUtils.cutYearMonth(a(1).toString))) //过滤出近12份个月的数据
       .map(a => {val (lng, lat) = getLngAndLat(a(4).toString); (a(2).toString, (a(0).toString, a(1).toString, a(3).toString, lng, lat))})
       .leftOuterJoin(shopRDD).cache() //(15453,((12974166848017753,2015/8/13,1815187,120.15386581420898,30.318574905395508),Some((120.163436,30.326016))))
@@ -95,7 +95,7 @@ object AntiFraudDao extends Logging {
    * 返回字段：(订单号,订单额,订单日期,店铺ID,店铺名称,下单时间,FQZ5,是否异常)
    */
   def getFQZ5Info = {
-    val last12MonthsOrderSales = BizDao.getOrderProps(SQL().setSelect("order_date,shop_id,order_money,order_id,place_order_time,shop_name"))
+    val last12MonthsOrderSales = BizDao.getOrderProps(SQL().select("order_date,shop_id,order_money,order_id,place_order_time,shop_name"))
       .map(a => (a(0).toString, a(1), a(2).toString.toDouble, a(3), a(4), a(5)))
       .filter(t => last12MothsList.contains(DateUtils.cutYearMonth(t._1.toString))) // 过滤出近12个月的数据 (2015/8/13,15453,16.0,12174964992731653)
     val avgSaleInDay = last12MonthsOrderSales

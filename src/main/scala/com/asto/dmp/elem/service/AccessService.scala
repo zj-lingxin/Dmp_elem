@@ -28,7 +28,7 @@ import com.asto.dmp.elem.util.{Utils, FileUtils}
  * 输出结果：
  * 餐厅ID,餐厅名称,平台连续经营时间,日均净营业额,基于3个月的营业额增长率,基于1个月的营业额增长率,刷单率,是否准入
  */
-class AccessService extends DataSource {
+class AccessService extends Service {
 
   def run(): Unit = {
     try {
