@@ -31,12 +31,12 @@ object CreditDao extends scala.Serializable  {
     BizDao.getOrderProps(SQL().select("order_date,shop_id,order_money"))
       .map(a => ((DateUtils.cutYearMonth(a(0).toString), a(1)), a(2).toString.toDouble))
       .filter(t => last12MothsList.contains(t._1._1)) //((2014/10,15453),13.0)
-      .groupByKey() //((2014/10,15453),CompactBuffer(7.0, 12.0, 13.0, 11,...))
-      .map(t => (t._1, t._2.sum)) //((2014/10,15453),113392.0)
+      .groupByKey()                                   //((2014/10,15453),CompactBuffer(7.0, 12.0, 13.0, 11,...))
+      .map(t => (t._1, t._2.sum))                     //((2014/10,15453),113392.0)
       .map(t => (t._1, CreditDao.getAvgSales(t._1._1, t._2)))
       .map(t => (t._1._2, t._2))
-      .reduceByKey(_ + _) //12个月日均销售总额 (15453,38746.96612903226)
-      .map(t => (t._1.toString, t._2 / 12)) //近12个月日均营业额均值 (15453,3228.913844086022)
+      .reduceByKey(_ + _)                             //12个月日均销售总额 (15453,38746.96612903226)
+      .map(t => (t._1.toString, t._2 / 12))           //近12个月日均营业额均值 (15453,3228.913844086022)
   }
 
   /**

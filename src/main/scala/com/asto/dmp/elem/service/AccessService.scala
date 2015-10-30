@@ -1,8 +1,8 @@
 package com.asto.dmp.elem.service
 
-import com.asto.dmp.elem.base.{DataSource, Constants}
+import com.asto.dmp.elem.base.Constants
 import com.asto.dmp.elem.dao.AccessDao
-import com.asto.dmp.elem.util.mail.{Mail, MailAgent}
+import com.asto.dmp.elem.util.mail.MailAgent
 import com.asto.dmp.elem.util.{Utils, FileUtils}
 
 /**

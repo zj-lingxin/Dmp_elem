@@ -42,7 +42,8 @@ object AccessDao {
    * 返回字段:(店铺ID,基于3个月的营业额增长率)
    */
   def getSaleRateInThreeMonths = {
-    BizUtils.lastMonthsDayAverageSales(3).leftOuterJoin(lastSixMonthsDayAverageSales) // (15453,(238.93896569380442,Some(1844.7884792626726)))
+    BizUtils.lastMonthsDayAverageSales(3).
+      leftOuterJoin(lastSixMonthsDayAverageSales)        // (15453,(238.93896569380442,Some(1844.7884792626726)))
       .filter(t => t._2._2.isDefined && t._2._2.get > 0) //过滤出符合条件的分母
       .map(t => (t._1, t._2._1 / t._2._2.get))
   }
